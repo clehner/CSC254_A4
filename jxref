@@ -1,0 +1,36 @@
+#!/usr/bin/env python
+
+# vim: ts=4 sw=4 sts=4 noet
+
+"""
+Java Cross-Indexer
+http://cs.rochester.edu/u/scott/254/assignments/xref.shtml
+
+Parse java/class files in a directory, and render the result as html in XREF.
+
+authors:
+Charles Lehner
+Dan Scarfoni
+"""
+
+from parser import Parser
+from renderer import Renderer
+
+import os, sys
+
+if len(sys.argv) <= 1:
+	print "Usage: "+sys.argv[0]+" [directory]"
+	sys.exit(1)
+
+inputDir = sys.argv[1]
+outputDir = "XREF"
+
+parser = Parser(inputDir)
+renderer = Renderer(outputDir)
+for classData in parser.parse():
+	renderer.renderClass(classData)
+renderer.renderIndex();
+
+# pass intermediate output to the renderer
+# render output into html files
+
