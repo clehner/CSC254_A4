@@ -1,11 +1,29 @@
-import os
+import os, fnmatch
+
+indexHeader = """<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Java Cross-Indexer</title>
+</head>
+<body>
+	<h1>Java Cross-Indexer</h1>
+	<ul>
+"""
+
+indexFooter = """	</ul>
+</body>
+</html>
+"""
+
+indexLinkLine = '\t\t<li><a href="%s">%s</a></li>\n'
 
 header = """<!doctype html>
 <html>
-	<head>
-		<meta charset="utf-8">
-		<title>%s</title>
-	</head>
+<head>
+	<meta charset="utf-8">
+	<title>%s</title>
+</head>
 <body>
 	<h1>%s</h1>
 """
@@ -54,4 +72,15 @@ class Renderer(object):
 		page = os.path.join(self.path, 'index.html')
 		ensureDir(page)
 		with open(page, 'w') as f:
-			f.write("<!doctype html>\n")
+			f.write(indexHeader)
+			# Add a link for every page in the directory
+			for root, dirs, files in os.walk(self.path):
+				for file in fnmatch.filter(files, '*.html'):
+					if file == 'index.html':
+						continue
+					relDir = os.path.relpath(root, self.path)
+					relFile = os.path.join(relDir, file).replace('./', '')
+					className = relFile.replace(os.path.sep,
+							'.').replace('.html', '')
+					f.write(indexLinkLine % (relFile, className))
+			f.write(indexFooter)
