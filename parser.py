@@ -47,5 +47,14 @@ class Parser(object):
 					classData['name'] = match.group(1)
 			if not match:
 				classData['name'] = 'UnknownClass'
+
+			lines = []
+			for line in open(javaFile):
+				tokens = []
+				token = {'value': line}
+				tokens.append(token)
+				lines.append(tokens)
+
+			classData['lines'] = lines
 			yield classData
 

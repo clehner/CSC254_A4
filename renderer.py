@@ -1,5 +1,9 @@
 import os, fnmatch
 
+"""
+Template for index page
+"""
+
 indexHeader = """<!doctype html>
 <html>
 <head>
@@ -18,7 +22,11 @@ indexFooter = """	</ul>
 
 indexLinkLine = '\t\t<li><a href="%s">%s</a></li>\n'
 
-header = """<!doctype html>
+"""
+Template for class page
+"""
+
+classHeader = """<!doctype html>
 <html>
 <head>
 	<meta charset="utf-8">
@@ -26,9 +34,11 @@ header = """<!doctype html>
 </head>
 <body>
 	<h1>%s</h1>
+	<pre class="javaclass">
 """
 
-footer = """</body>
+classFooter = """	</pre>
+</body>
 </html>
 """
 
@@ -40,6 +50,19 @@ def ensureDir(f):
 	d = os.path.dirname(f)
 	if not os.path.exists(d):
 		os.makedirs(d)
+
+def tokenToHTML(tok):
+	innerText = tok['value'].replace('\t', '    ')\
+		.replace('&', '&amp;')\
+		.replace('<', '&lt;')\
+		.replace('>', '&gt;')\
+		.replace('"', '&quot;')\
+		.replace('\'', '&apos;')
+	tokType = tok.get('type', None)
+	if tokType:
+		return '<span class="' + tokType + '">' + innerText + '</span>'
+	else:
+		return innerText
 
 """
 Renderer
@@ -59,10 +82,10 @@ class Renderer(object):
 		print "Writing " + page
 		ensureDir(page)
 		with open(page, 'w') as f:
-			f.write(header % (className, className))
-			f.write(footer)
-			#f.write('<td><font style="background-color:%s;">%s<font></td>' %
-					#(colour[j % len(colour)], k))
+			f.write(classHeader % (className, className))
+			for line in classData['lines']:
+				f.write(''.join([tokenToHTML(token) for token in line]))
+			f.write(classFooter)
 
 	"""
 	Build and write an index page, with table of contents for classes.
