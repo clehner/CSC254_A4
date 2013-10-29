@@ -30,7 +30,3 @@ renderer = Renderer(outputDir)
 for classData in parser.parse():
 	renderer.renderClass(classData)
 renderer.renderIndex();
-
-# pass intermediate output to the renderer
-# render output into html files
-
