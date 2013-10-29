@@ -14,5 +14,9 @@ public class Hello {
 		Class2 class2 = new Class2("dumb info");
 		class2.print_info();
 	}
+
+	static int return1() {
+		return 1;
+	}
 }
 
