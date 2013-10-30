@@ -36,19 +36,20 @@ class Parser(object):
 	"""
 	def parse(self):
 		for (javaFile, classFiles) in findJavaFiles(self.path):
+			#initialization junk
 			javapFiles = [javap(file) for file in classFiles]
-
 			classData = {}
 			javaPFile = javapFiles[0]
 			line = next(itertools.islice(javaPFile, 4, None))
-			#
+
+			#get class name
 			if line:
 				#matches invalid classes
 				match = re.match(r"^.*class (.+)$", line)
 				if match:
 					classData['name'] = match.group(1)
 				if not match:
-				classData['name'] = 'UnknownClass'
+					classData['name'] = 'UnknownClass'
 
 			#get the info for each line
 			line_tokens = []
