@@ -39,6 +39,10 @@ class Parser(object):
 			#initialization junk
 			javapFiles = [javap(file) for file in classFiles]
 			sourceData = {}
+			sourceData['class_names'] = []
+			sourceData['method_refs'] = []
+			sourceData['lines'] = []
+
 			javaPFile = javapFiles[0]
 
 			#get class name, methods used from javap file
@@ -52,9 +56,9 @@ class Parser(object):
 					sourceData['class_names'].append('UnknownClass')
 			
 				#get methods
-				match = re.match(r"^invoke(.+)$",line)
+				match2 = re.match(r"invoke",line)
 				if match:
-					sourceData['method_refs'].append(match.grout(1))
+					sourceData['method_refs'].append(match2.group(1))
 
 
 			#get the info for each line
@@ -70,6 +74,5 @@ class Parser(object):
 if __name__ == '__main__':
 	parser = Parser('.')
 	info = parser.parse()
-	print(info.next())
-	print('\n\n&&&&&&&&&&&&&&&&&&&&&&    loadinate      &&&&&&&&&&&&&&&\n\n')
-	print(info.next())
+	for i in info:
+		print(i['method_refs'][:])
