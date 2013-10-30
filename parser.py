@@ -38,28 +38,33 @@ class Parser(object):
 		for (javaFile, classFiles) in findJavaFiles(self.path):
 			#initialization junk
 			javapFiles = [javap(file) for file in classFiles]
-			classData = {}
+			sourceData = {}
 			javaPFile = javapFiles[0]
-			line = next(itertools.islice(javaPFile, 4, None))
 
-			#get class name
+			#get class name, methods used from javap file
+			line = next(itertools.islice(javaPFile, 4, None))
 			if line:
-				#matches invalid classes
+				#matches classes
 				match = re.match(r"^.*class (.+)$", line)
 				if match:
-					classData['name'] = match.group(1)
+					sourceData['class_names'].append(match.group(1))
 				if not match:
-					classData['name'] = 'UnknownClass'
+					sourceData['class_names'].append('UnknownClass')
+			
+				#get methods
+				match = re.match(r"^invoke(.+)$",line)
+				if match:
+					sourceData['method_refs'].append(match.grout(1))
+
 
 			#get the info for each line
 			line_tokens = []
 			for line in open(javaFile):
 				#TODO- make this not get rid of tabs
 				line_tokens.append(line.split())	
-			classData['lines'] = line_tokens
+			sourceData['lines'] = line_tokens
 
-			#get the 
-			yield classData
+			yield sourceData
 
 
 if __name__ == '__main__':
