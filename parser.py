@@ -29,6 +29,7 @@ class Parser(object):
 
 	def __init__(self, inputDir):
 		self.path = inputDir
+		print(os.
 
 	"""
 	Parse the java and class files in the path
@@ -57,6 +58,8 @@ class Parser(object):
 				lines.append(tokens)
 
 			classData['lines'] = lines
+			print('should be all the data in a javap, all of it')
+			print(lines[:])
 			yield classData
 
 
