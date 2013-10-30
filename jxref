@@ -30,3 +30,4 @@ renderer = Renderer(outputDir)
 for classData in parser.parse():
 	renderer.renderClass(classData)
 renderer.renderIndex();
+renderer.copyStatics();

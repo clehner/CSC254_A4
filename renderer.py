@@ -1,4 +1,4 @@
-import os, fnmatch
+import sys, os, fnmatch, shutil
 
 """
 Template for index page
@@ -9,6 +9,7 @@ indexHeader = """<!doctype html>
 <head>
 	<meta charset="utf-8">
 	<title>Java Cross-Indexer</title>
+	<link rel="stylesheet" href="static/style.css" type="text/css">
 </head>
 <body>
 	<h1>Java Cross-Indexer</h1>
@@ -31,13 +32,14 @@ classHeader = """<!doctype html>
 <head>
 	<meta charset="utf-8">
 	<title>%s</title>
+	<link rel="stylesheet" href="%sstatic/style.css" type="text/css">
 </head>
 <body>
 	<h1>%s</h1>
-	<pre class="javaclass">
+	<ol class="javaclass">
 """
 
-classFooter = """	</pre>
+classFooter = """	</ol>
 </body>
 </html>
 """
@@ -71,6 +73,22 @@ Converts data about Java classes into HTML pages
 class Renderer(object):
 	def __init__(self, outputDir):
 		self.path = outputDir
+		scriptDir = os.path.dirname(sys.argv[0])
+		self.staticSource = os.path.join(scriptDir, 'static')
+		self.staticDest = os.path.join(self.path, 'static')
+
+	"""
+	Copy static files into XREF directory
+	"""
+	def copyStatics(self):
+		print "Copying static files"
+		for srcDir, dirs, files in os.walk(self.staticSource):
+			dstDir = srcDir.replace(self.staticSource, self.staticDest)
+			if not os.path.exists(dstDir):
+				os.mkdir(dstDir)
+			for file in files:
+				srcFile = os.path.join(srcDir, file)
+				shutil.copy(srcFile, dstDir)
 
 	"""
 	Create and write an HTML page for a Java class
@@ -78,13 +96,17 @@ class Renderer(object):
 	def renderClass(self, classData):
 		className = classData['name']
 		print "Rendering class " + className
-		page = os.path.join(self.path, *className.split('.'))+'.html'
+		dirs = className.split('.')
+		page = os.path.join(self.path, *dirs)+'.html'
 		print "Writing " + page
 		ensureDir(page)
+		rootDir = "../" * (len(dirs)-1)
 		with open(page, 'w') as f:
-			f.write(classHeader % (className, className))
+			f.write(classHeader % (className, rootDir, className))
 			for line in classData['lines']:
-				f.write(''.join([tokenToHTML(token) for token in line]))
+				f.write('<li>' +
+						''.join([tokenToHTML(token) for token in line]) +
+						'</li>')
 			f.write(classFooter)
 
 	"""
