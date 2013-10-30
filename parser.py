@@ -42,6 +42,7 @@ class Parser(object):
 			javaPFile = javapFiles[0]
 			line = next(itertools.islice(javaPFile, 4, None))
 			if line:
+				#this matches basically anything, I think there are some illegal class names read by this. It doesn't matter but it'll give us something to write about
 				match = re.match(r"^.*class (.+)$", line)
 				if match:
 					classData['name'] = match.group(1)
@@ -58,3 +59,7 @@ class Parser(object):
 			classData['lines'] = lines
 			yield classData
 
+
+if __name__ == '__main__':
+	parser = Parser('.')
+	
