@@ -62,4 +62,5 @@ class Parser(object):
 
 if __name__ == '__main__':
 	parser = Parser('.')
+	info = parser.parse()
 	
