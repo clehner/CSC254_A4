@@ -26,10 +26,9 @@ def javap(file):
 Parser
 """
 class Parser(object):
-
+	'''main class for parsing class files'''
 	def __init__(self, inputDir):
 		self.path = inputDir
-		print(os.
 
 	"""
 	Parse the java and class files in the path
@@ -42,28 +41,29 @@ class Parser(object):
 			classData = {}
 			javaPFile = javapFiles[0]
 			line = next(itertools.islice(javaPFile, 4, None))
+			#
 			if line:
-				#this matches basically anything, I think there are some illegal class names read by this. It doesn't matter but it'll give us something to write about
+				#matches invalid classes
 				match = re.match(r"^.*class (.+)$", line)
 				if match:
 					classData['name'] = match.group(1)
-			if not match:
+				if not match:
 				classData['name'] = 'UnknownClass'
 
-			lines = []
+			#get the info for each line
+			line_tokens = []
 			for line in open(javaFile):
-				tokens = []
-				token = {'value': line}
-				tokens.append(token)
-				lines.append(tokens)
+				#TODO- make this not get rid of tabs
+				line_tokens.append(line.split())	
+			classData['lines'] = line_tokens
 
-			classData['lines'] = lines
-			print('should be all the data in a javap, all of it')
-			print(lines[:])
+			#get the 
 			yield classData
 
 
 if __name__ == '__main__':
 	parser = Parser('.')
 	info = parser.parse()
-	
+	print(info.next())
+	print('\n\n&&&&&&&&&&&&&&&&&&&&&&    loadinate      &&&&&&&&&&&&&&&\n\n')
+	print(info.next())
