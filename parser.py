@@ -56,17 +56,18 @@ class Parser(object):
 					match = re.match(r"^.*class (.+)$", line)
 					if match:
 						sourceData['class_names'].append(match.group(1))
+						sourceData['method_refs'] = {match.group(1):[]}
 					if not match:
 						sourceData['class_names'].append('UnknownClass')
-
+				
 				for line in javapFile:	
 					#get methods
 					match2 = re.match(r"^.*invoke(.*)$",line)
 					if match2:
 						s = str(match2.group(1))
-						s = s[s.index('Method')+7 :s.index(':')]
+						s = s[s.index('Method')+7 :]
 						s = s.split('.')
-						sourceData['method_refs'][s[0]] = s[1]
+						sourceData['method_refs'][s[0]].add(s[1])
 
 
 			#get the info for each line
