@@ -1,5 +1,9 @@
 import os, fnmatch, subprocess, itertools, re
 
+keywords = ['abstact','assert','boolean','break','byte','case','catch','const','continue','default','do','double','else','enum','extends','final','finally','float',\
+'for','goto','if','implements','import','instanceof','int','interface','long','native','new','package','private','protected','public','return','short','static','strictfp',\
+'super','switch','synchronized','this','throw','throws','transient','try','void','volatile','while']
+
 """
 Find java files and their associated class files in a directory.
 Returns an iterator of tuple of java filename and class filenames.
@@ -78,6 +82,10 @@ class Parser(object):
 if __name__ == '__main__':
 	parser = Parser('.')
 	info = parser.parse()
+	first = next(info)
+	for line in first['lines']:
+		print(line)
+	'''
 	for i in info:
 		print('##############')
 		print('classes')
@@ -87,3 +95,4 @@ if __name__ == '__main__':
 		print('lines')
 		print(str(i['lines']))
 		print()
+	'''
