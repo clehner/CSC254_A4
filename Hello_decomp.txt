@@ -1,6 +1,6 @@
 Classfile /home/hoover/u3/dscarafo/Documents/fall2013/csc254/CSC254_A4/Hello.class
-  Last modified Oct 29, 2013; size 650 bytes
-  MD5 checksum b8dcd24faf7ff3c94299bd90e689380e
+  Last modified Oct 31, 2013; size 737 bytes
+  MD5 checksum 94ed8367180b38d9122e65d0e2f5501f
   Compiled from "Hello.java"
 public class Hello
   SourceFile: "Hello.java"
@@ -8,49 +8,54 @@ public class Hello
   major version: 51
   flags: ACC_PUBLIC, ACC_SUPER
 Constant pool:
-   #1 = Methodref          #11.#23        //  java/lang/Object."<init>":()V
-   #2 = Fieldref           #24.#25        //  java/lang/System.out:Ljava/io/PrintStream;
-   #3 = String             #26            //  hello world!
-   #4 = Methodref          #27.#28        //  java/io/PrintStream.println:(Ljava/lang/String;)V
-   #5 = Methodref          #27.#29        //  java/io/PrintStream.println:(I)V
-   #6 = Class              #30            //  Class2
-   #7 = String             #31            //  dumb info
-   #8 = Methodref          #6.#32         //  Class2."<init>":(Ljava/lang/String;)V
-   #9 = Methodref          #6.#33         //  Class2.print_info:()V
-  #10 = Class              #34            //  Hello
-  #11 = Class              #35            //  java/lang/Object
-  #12 = Utf8               <init>
-  #13 = Utf8               ()V
-  #14 = Utf8               Code
-  #15 = Utf8               LineNumberTable
-  #16 = Utf8               main
-  #17 = Utf8               ([Ljava/lang/String;)V
-  #18 = Utf8               StackMapTable
-  #19 = Utf8               return1
-  #20 = Utf8               ()I
-  #21 = Utf8               SourceFile
-  #22 = Utf8               Hello.java
-  #23 = NameAndType        #12:#13        //  "<init>":()V
-  #24 = Class              #36            //  java/lang/System
-  #25 = NameAndType        #37:#38        //  out:Ljava/io/PrintStream;
-  #26 = Utf8               hello world!
-  #27 = Class              #39            //  java/io/PrintStream
-  #28 = NameAndType        #40:#41        //  println:(Ljava/lang/String;)V
-  #29 = NameAndType        #40:#42        //  println:(I)V
-  #30 = Utf8               Class2
-  #31 = Utf8               dumb info
-  #32 = NameAndType        #12:#41        //  "<init>":(Ljava/lang/String;)V
-  #33 = NameAndType        #43:#13        //  print_info:()V
-  #34 = Utf8               Hello
-  #35 = Utf8               java/lang/Object
-  #36 = Utf8               java/lang/System
-  #37 = Utf8               out
-  #38 = Utf8               Ljava/io/PrintStream;
-  #39 = Utf8               java/io/PrintStream
-  #40 = Utf8               println
-  #41 = Utf8               (Ljava/lang/String;)V
-  #42 = Utf8               (I)V
-  #43 = Utf8               print_info
+   #1 = Methodref          #15.#27        //  java/lang/Object."<init>":()V
+   #2 = Fieldref           #28.#29        //  java/lang/System.out:Ljava/io/PrintStream;
+   #3 = String             #30            //  hello world!
+   #4 = Methodref          #31.#32        //  java/io/PrintStream.println:(Ljava/lang/String;)V
+   #5 = Methodref          #31.#33        //  java/io/PrintStream.println:(I)V
+   #6 = Class              #34            //  Class2
+   #7 = String             #35            //  dumb info
+   #8 = Methodref          #6.#36         //  Class2."<init>":(Ljava/lang/String;)V
+   #9 = Methodref          #6.#37         //  Class2.print_info:()V
+  #10 = Double             2.0d
+  #12 = String             #38            //  readme
+  #13 = Methodref          #14.#39        //  Hello.return1:(IDLjava/lang/String;)I
+  #14 = Class              #40            //  Hello
+  #15 = Class              #41            //  java/lang/Object
+  #16 = Utf8               <init>
+  #17 = Utf8               ()V
+  #18 = Utf8               Code
+  #19 = Utf8               LineNumberTable
+  #20 = Utf8               main
+  #21 = Utf8               ([Ljava/lang/String;)V
+  #22 = Utf8               StackMapTable
+  #23 = Utf8               return1
+  #24 = Utf8               (IDLjava/lang/String;)I
+  #25 = Utf8               SourceFile
+  #26 = Utf8               Hello.java
+  #27 = NameAndType        #16:#17        //  "<init>":()V
+  #28 = Class              #42            //  java/lang/System
+  #29 = NameAndType        #43:#44        //  out:Ljava/io/PrintStream;
+  #30 = Utf8               hello world!
+  #31 = Class              #45            //  java/io/PrintStream
+  #32 = NameAndType        #46:#47        //  println:(Ljava/lang/String;)V
+  #33 = NameAndType        #46:#48        //  println:(I)V
+  #34 = Utf8               Class2
+  #35 = Utf8               dumb info
+  #36 = NameAndType        #16:#47        //  "<init>":(Ljava/lang/String;)V
+  #37 = NameAndType        #49:#17        //  print_info:()V
+  #38 = Utf8               readme
+  #39 = NameAndType        #23:#24        //  return1:(IDLjava/lang/String;)I
+  #40 = Utf8               Hello
+  #41 = Utf8               java/lang/Object
+  #42 = Utf8               java/lang/System
+  #43 = Utf8               out
+  #44 = Utf8               Ljava/io/PrintStream;
+  #45 = Utf8               java/io/PrintStream
+  #46 = Utf8               println
+  #47 = Utf8               (Ljava/lang/String;)V
+  #48 = Utf8               (I)V
+  #49 = Utf8               print_info
 {
   public Hello();
     flags: ACC_PUBLIC
@@ -65,7 +70,7 @@ Constant pool:
   public static void main(java.lang.String[]);
     flags: ACC_PUBLIC, ACC_STATIC
     Code:
-      stack=3, locals=3, args_size=1
+      stack=4, locals=7, args_size=1
          0: getstatic     #2                  // Field java/lang/System.out:Ljava/io/PrintStream;
          3: ldc           #3                  // String hello world!
          5: invokevirtual #4                  // Method java/io/PrintStream.println:(Ljava/lang/String;)V
@@ -92,7 +97,18 @@ Constant pool:
         44: astore_2      
         45: aload_2       
         46: invokevirtual #9                  // Method Class2.print_info:()V
-        49: return        
+        49: iconst_0      
+        50: istore_3      
+        51: ldc2_w        #10                 // double 2.0d
+        54: dstore        4
+        56: ldc           #12                 // String readme
+        58: astore        6
+        60: iload_3       
+        61: dload         4
+        63: aload         6
+        65: invokestatic  #13                 // Method return1:(IDLjava/lang/String;)I
+        68: pop           
+        69: return        
       LineNumberTable:
         line 4: 0
         line 7: 8
@@ -103,6 +119,10 @@ Constant pool:
         line 14: 35
         line 15: 45
         line 16: 49
+        line 17: 51
+        line 18: 56
+        line 19: 60
+        line 20: 69
       StackMapTable: number_of_entries = 2
            frame_type = 253 /* append */
              offset_delta = 12
@@ -111,12 +131,12 @@ Constant pool:
           offset_delta = 15
 
 
-  static int return1();
+  static int return1(int, double, java.lang.String);
     flags: ACC_STATIC
     Code:
-      stack=1, locals=0, args_size=0
+      stack=1, locals=4, args_size=3
          0: iconst_1      
          1: ireturn       
       LineNumberTable:
-        line 19: 0
+        line 23: 0
 }

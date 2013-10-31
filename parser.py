@@ -74,29 +74,31 @@ class Parser(object):
 			for line in open(javaFile):
 				#TODO- make this not get rid of tabs
 				split = line.split()
-				line_tokens.append(line)	
+				line_tokens.append(split)	
 			#add comments
 			lines_commented = add_comments(line_tokens)
-			sourceData['lines'] = line_tokens
+			sourceData['lines'] = lines_commented
 
 			yield sourceData
 
 def add_comments(line_tokens):
 	for line in line_tokens:
 		for token in line:
-			if re.match(r"(.*)//(.*)",line):
+			if token.find('//'):
+				#split the token to take the '//' part off
 				print(token)
-				line = ' '.join(line[line.index('//'):])
+				token = token.split('//')
+				print(token)
 			break
+	return line_tokens
 
 
 if __name__ == '__main__':
 	parser = Parser('.')
 	info = parser.parse()
-	first = next(info)
-	for line in first['lines']:
-		print(line)
-	'''
+	#first = next(info)
+	#print(first['lines'])
+
 	for i in info:
 		print('##############')
 		print('classes')
@@ -106,4 +108,4 @@ if __name__ == '__main__':
 		print('lines')
 		print(str(i['lines']))
 		print()
-	'''
+

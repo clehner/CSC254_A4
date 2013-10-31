@@ -3,7 +3,7 @@ public class Class2 {
 	//this class just stores one string
 	String info;
 
-	public Class2(String info) {
+	public Class2(String info) {//this comment is hard to parse
 		this.info = info;
 	}
 
