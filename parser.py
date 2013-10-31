@@ -79,5 +79,11 @@ if __name__ == '__main__':
 	parser = Parser('.')
 	info = parser.parse()
 	for i in info:
-		print('next class')
+		print('##############')
+		print('classes')
+		print(str(i['class_names']))
+		print('methods')
 		print(str(i['method_refs']))
+		print('lines')
+		print(str(i['lines']))
+		print()
