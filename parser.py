@@ -89,12 +89,13 @@ class Parser(object):
 
 def add_comments(line_tokens):
 	for line in line_tokens:
-		for token in line:
-			if token.find('//'):
+		print(line)
+		for i in range(len(line)):
+			if line[i].find('//') > -1:
 				#split the token to take the '//' part off
-				print(token)
-				token = token.split('//')
-				print(token)
+				split_token = line[i].split('//')
+				split_token[1] = '//'+split_token[1]
+				print('    line after- ',line)
 			break
 	return line_tokens
 
@@ -102,9 +103,9 @@ def add_comments(line_tokens):
 if __name__ == '__main__':
 	parser = Parser('.')
 	info = parser.parse()
-	#first = next(info)
+	first = next(info)
 	#print(first['lines'])
-
+	'''
 	for i in info:
 		print('##############')
 		print('classes')
@@ -114,4 +115,4 @@ if __name__ == '__main__':
 		print('lines')
 		print(str(i['lines']))
 		print()
-
+	'''
