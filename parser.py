@@ -90,12 +90,15 @@ class Parser(object):
 def add_comments(line_tokens):
 	for line in line_tokens:
 		print(line)
+		start_comment = False
 		for i in range(len(line)):
+			print(line[i])
 			if line[i].find('//') > -1:
 				#split the token to take the '//' part off
 				split_token = line[i].split('//')
 				split_token[1] = '//'+split_token[1]
 				print('    line after- ',line)
+				start_comment = True
 			break
 	return line_tokens
 
