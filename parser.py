@@ -60,9 +60,9 @@ class Parser(object):
 					match2 = re.match(r"^.*invoke(.*)$",line)
 					if match2:
 						s = match2.group(1)
-						s = s[s.index('Method'):]#s.index(':()')]
-						print(s)
+						s = s[s.index('Method')+7:s.index(':')]
 						s.split('.')
+						print('string so far- '+s[0])
 						sourceData['method_refs'][s[0]] = s[1]
 
 
