@@ -1,4 +1,5 @@
-import os, fnmatch, subprocess, itertools, re
+import os, fnmatch, subprocess, itertools, re,collections
+
 
 keywords = ['abstact','assert','boolean','break','byte','case','catch','const','continue','default','do','double','else','enum','extends','final','finally','float',\
 'for','goto','if','implements','import','instanceof','int','interface','long','native','new','package','private','protected','public','return','short','static','strictfp',\
@@ -44,19 +45,20 @@ class Parser(object):
 			javapFiles = [javap(file) for file in classFiles]
 			sourceData = {}
 			sourceData['class_names'] = []
-			sourceData['method_refs'] = {}
+			sourceData['method_refs'] = collections.defaultdict(list) 
 			sourceData['lines'] = []
 			
 			for javapFile in javapFiles:
 				#loop through javap, collect class data
 				#get class name, methods used from javap file
 				line = next(itertools.islice(javapFile, 4, None))
+				current_class= ''
 				if line:
 					#matches classes
 					match = re.match(r"^.*class (.+)$", line)
 					if match:
 						sourceData['class_names'].append(match.group(1))
-						sourceData['method_refs'] = {match.group(1):[]}
+						current_class= match.group(1)
 					if not match:
 						sourceData['class_names'].append('UnknownClass')
 				
@@ -67,8 +69,11 @@ class Parser(object):
 						s = str(match2.group(1))
 						s = s[s.index('Method')+7 :]
 						s = s.split('.')
-						sourceData['method_refs'][s[0]].add(s[1])
-
+						#isourceData['method_refs'][s[0]].append(s[1]) if s[1] != None else sourceData['method_refs'][current_class].append(s[0])
+						if len(s) > 1:
+							sourceData['method_refs'][s[0]].append(s[1])
+						else:
+							sourceData['method_refs'][current_class].append(s[0])
 
 			#get the info for each line
 			line_tokens = []
