@@ -73,10 +73,21 @@ class Parser(object):
 			line_tokens = []
 			for line in open(javaFile):
 				#TODO- make this not get rid of tabs
-				line_tokens.append(line.split())	
+				split = line.split()
+				line_tokens.append(line)	
+			#add comments
+			lines_commented = add_comments(line_tokens)
 			sourceData['lines'] = line_tokens
 
 			yield sourceData
+
+def add_comments(line_tokens):
+	for line in line_tokens:
+		for token in line:
+			if re.match(r"(.*)//(.*)",line):
+				print(token)
+				line = ' '.join(line[line.index('//'):])
+			break
 
 
 if __name__ == '__main__':
