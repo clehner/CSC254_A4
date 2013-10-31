@@ -92,14 +92,20 @@ def add_comments(line_tokens):
 		print(line)
 		start_comment = False
 		for i in range(len(line)):
-			print(line[i])
 			if line[i].find('//') > -1:
 				#split the token to take the '//' part off
 				split_token = line[i].split('//')
 				split_token[1] = '//'+split_token[1]
-				print('    line after- ',line)
+				line = line[:i-1]+split_token+line[i+1:]
 				start_comment = True
-			break
+
+			#flatten the rest of the list if there's a comment
+			if(start_comment):
+				line[i] = ' '.join(line[i:])
+				line = line[:i+1]
+				print('after ',line)
+				break
+
 	return line_tokens
 
 
