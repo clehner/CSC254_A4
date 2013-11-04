@@ -83,9 +83,12 @@ class Parser(object):
 			#get the info for each line
 			line_tokens = []
 			for line in open(javaFile):
-				words = line.rstrip().split(" ")
+				words = line.rstrip().split(' ')
+
 				line = []
-				for word in words:
+				for i, word in enumerate(words):
+					if i != 0:
+						word = ' ' + word
 					if word.strip() in keywords:
 						tok_type = Token.KEYWORD
 					else:
@@ -118,7 +121,7 @@ def add_comments(line_tokens):
 
 			#flatten the rest of the list if there's a comment
 			if(start_comment):
-				line[i].text = ' '.join([tok.text for tok in line[i:]])
+				line[i].text = ''.join([tok.text for tok in line[i:]])
 				line[i+1:] = []
 				break
 
