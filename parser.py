@@ -126,7 +126,7 @@ def add_comments(line_tokens):
 
 
 if __name__ == '__main__':
-	parser = Parser('.')
+	parser = Parser('java')
 	info = parser.parse()
 	first = next(info)
 	#print(first['lines'])
