@@ -1,0 +1,15 @@
+.keyword {
+	font-weight: bold;
+}
+
+.comment {
+	font-style: oblique;
+}
+
+.javaclass {
+	font-family: monospace;
+}
+
+.javaclass li {
+	white-space: pre-wrap;
+}
