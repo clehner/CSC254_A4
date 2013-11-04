@@ -86,7 +86,7 @@ class Parser(object):
 				words = line.rstrip().split(" ")
 				line = []
 				for word in words:
-					if word in keywords:
+					if word.strip() in keywords:
 						tok_type = Token.KEYWORD
 					else:
 						tok_type = Token.PLAIN

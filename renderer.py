@@ -36,8 +36,7 @@ classHeader = """<!doctype html>
 </head>
 <body>
 	<h1>%s</h1>
-	<ol class="javaclass">
-"""
+	<ol class="javaclass">"""
 
 classFooter = """	</ol>
 </body>
@@ -106,7 +105,7 @@ class Renderer(object):
 			for line in classData['lines']:
 				f.write('<li>' +
 						''.join([tokenToHTML(token) for token in line]) +
-						'</li>')
+						'</li>\n')
 			f.write(classFooter)
 
 	"""
