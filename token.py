@@ -8,11 +8,13 @@ class Token(object):
 	PLAIN = 0
 	COMMENT = 1
 	KEYWORD = 2
+	METHOD_INVOCATION = 3
 
 	token_names = {
 		PLAIN: None,
 		COMMENT: "comment",
-		KEYWORD: "keyword"
+		KEYWORD: "keyword",
+		METHOD_INVOCATION: "method-invocation"
 	}
 
 	def __init__(self, text, tok_type=PLAIN):

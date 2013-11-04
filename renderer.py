@@ -1,4 +1,5 @@
 import sys, os, fnmatch, shutil
+from token import Token
 
 """
 Template for index page
@@ -52,18 +53,35 @@ def ensureDir(f):
 	if not os.path.exists(d):
 		os.makedirs(d)
 
-def tokenToHTML(tok):
-	innerText = tok.text.replace('\t', '    ')\
+"""
+Get a URL to a class page, relative to another page
+"""
+def getClassURL(className, page):
+	classPage = className.replace('.', os.path.sep) + '.html'
+	return os.path.relpath(page, classPage)
+
+"""
+Render a token on a page as text/html
+"""
+def tokenToHTML(tok, page):
+	text = tok.text.replace('\t', '    ')\
 		.replace('&', '&amp;')\
 		.replace('<', '&lt;')\
 		.replace('>', '&gt;')\
 		.replace('"', '&quot;')\
 		.replace('\'', '&apos;')
 	tokType = tok.get_type()
-	if tokType:
-		return '<span class="' + tokType + '">' + innerText + '</span>'
+	if tok.tok_type == Token.METHOD_INVOCATION:
+		# make a link to the declaration of the method
+		rel_file = getClassURL(tok.class_name, page)
+		link = rel_file + '#' + tok.name_and_type
+		return '<a href="' + link + 'class="' + tokType + '">' + text + '</a>'
+	elif tokType:
+		# render a token of a given type
+		return '<span class="' + tokType + '">' + text + '</span>'
 	else:
-		return innerText
+		# render an unstyled token
+		return text
 
 """
 Renderer
@@ -104,7 +122,7 @@ class Renderer(object):
 			f.write(classHeader % (className, rootDir, className))
 			for line in classData['lines']:
 				f.write('<li>' +
-						''.join([tokenToHTML(token) for token in line]) +
+						''.join([tokenToHTML(token, page) for token in line]) +
 						'</li>\n')
 			f.write(classFooter)
 
