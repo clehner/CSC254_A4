@@ -27,6 +27,17 @@ def javap(file):
 			stdout=subprocess.PIPE)
 	return iter(proc.stdout.readline, '')
 
+def readConstantPool(lines):
+	constants = [None] # indexed from 1 in javap
+	for line in lines:
+		m = re.match(r"\s*#[0-9]* = ([^\s]*)\s*(.*?)(?:\s*\/\/\s*(.*))?$", line)
+		if m:
+			(name, val, comment) = (m.group(1), m.group(2), m.group(3))
+			constants.append((name, val, comment))
+		else:
+			break
+	return constants
+
 """
 Parser
 """
@@ -45,6 +56,7 @@ class Parser(object):
 			javapFiles = [javap(file) for file in classFiles]
 			sourceData = {}
 			sourceData['class_names'] = []
+			sourceData['constants'] = []
 			sourceData['method_refs'] = collections.defaultdict(list)
 			sourceData['lines'] = []
 
@@ -55,6 +67,11 @@ class Parser(object):
 					if m:
 						sourceData['class_name'] = m.group(1)
 						break
+
+				#get constant pool
+				for line in javapFile:
+					if line == "Constant pool:\n":
+						sourceData['constants'] = readConstantPool(javapFile)
 
 				#loop through javap, collect class data
 				#get class name, methods used from javap file
