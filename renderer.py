@@ -54,13 +54,13 @@ def ensureDir(f):
 		os.makedirs(d)
 
 def tokenToHTML(tok):
-	innerText = tok['value'].replace('\t', '    ')\
+	innerText = tok.text.replace('\t', '    ')\
 		.replace('&', '&amp;')\
 		.replace('<', '&lt;')\
 		.replace('>', '&gt;')\
 		.replace('"', '&quot;')\
 		.replace('\'', '&apos;')
-	tokType = tok.get('type', None)
+	tokType = tok.get_type()
 	if tokType:
 		return '<span class="' + tokType + '">' + innerText + '</span>'
 	else:
@@ -94,7 +94,7 @@ class Renderer(object):
 	Create and write an HTML page for a Java class
 	"""
 	def renderClass(self, classData):
-		className = classData['name']
+		className = classData['class_name']
 		print "Rendering class " + className
 		dirs = className.split('.')
 		page = os.path.join(self.path, *dirs)+'.html'

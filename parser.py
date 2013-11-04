@@ -1,9 +1,9 @@
 import os, fnmatch, subprocess, itertools, re,collections
+from token import Token
 
-
-keywords = ['abstact','assert','boolean','break','byte','case','catch','const','continue','default','do','double','else','enum','extends','final','finally','float',\
+keywords = frozenset(['abstact','assert','boolean','break','byte','case','catch','const','continue','default','do','double','else','enum','extends','final','finally','float',\
 'for','goto','if','implements','import','instanceof','int','interface','long','native','new','package','private','protected','public','return','short','static','strictfp',\
-'super','switch','synchronized','this','throw','throws','transient','try','void','volatile','while']
+'super','switch','synchronized','this','throw','throws','transient','try','void','volatile','while'])
 
 """
 Find java files and their associated class files in a directory.
@@ -45,15 +45,21 @@ class Parser(object):
 			javapFiles = [javap(file) for file in classFiles]
 			sourceData = {}
 			sourceData['class_names'] = []
-			sourceData['method_refs'] = collections.defaultdict(list) 
+			sourceData['method_refs'] = collections.defaultdict(list)
 			sourceData['lines'] = []
-			
+
 			for javapFile in javapFiles:
+				#get the main class name
+				for line in javapFile:
+					m = re.match(r"^.*class (.+)$", line)
+					if m:
+						sourceData['class_name'] = m.group(1)
+						break
+
 				#loop through javap, collect class data
 				#get class name, methods used from javap file
-				line = next(itertools.islice(javapFile, 4, None))
 				current_class= ''
-				if line:
+				for line in javapFile:
 					#matches classes
 					match = re.match(r"^.*class (.+)$", line)
 					if match:
@@ -61,8 +67,7 @@ class Parser(object):
 						current_class= match.group(1)
 					if not match:
 						sourceData['class_names'].append('UnknownClass')
-				
-				for line in javapFile:	
+
 					#get methods
 					match2 = re.match(r"^.*invoke(.*)$",line)
 					if match2:
@@ -78,9 +83,15 @@ class Parser(object):
 			#get the info for each line
 			line_tokens = []
 			for line in open(javaFile):
-				#TODO- make this not get rid of tabs
-				split = line.split()
-				line_tokens.append(split)	
+				words = line.rstrip().split(" ")
+				line = []
+				for word in words:
+					if word in keywords:
+						tok_type = Token.KEYWORD
+					else:
+						tok_type = Token.PLAIN
+					line.append(Token(word+" ", tok_type))
+				line_tokens.append(line)
 			#add comments
 			lines_commented = add_comments(line_tokens)
 			sourceData['lines'] = lines_commented
@@ -89,21 +100,26 @@ class Parser(object):
 
 def add_comments(line_tokens):
 	for line in line_tokens:
-		print(line)
 		start_comment = False
 		for i in range(len(line)):
-			if line[i].find('//') > -1:
-				#split the token to take the '//' part off
-				split_token = line[i].split('//')
-				split_token[1] = '//'+split_token[1]
-				line = line[:i-1]+split_token+line[i+1:]
+			j = line[i].text.find('//')
+			if j == 0:
 				start_comment = True
+				line[i].tok_type = Token.COMMENT
+			elif j > -1:
+				#split the token to take the '//' part off
+				split_token = line[i].text.split('//')
+				line[i:i+1] = [
+					Token(split_token[0], line[i].tok_type),
+					Token('//'+split_token[1], Token.COMMENT)]
+				start_comment = True
+				# skip the regular token
+				i += 1
 
 			#flatten the rest of the list if there's a comment
 			if(start_comment):
-				line[i] = ' '.join(line[i:])
-				line = line[:i+1]
-				print('after ',line)
+				line[i].text = ''.join([tok.text for tok in line[i:]])
+				line[i+1:] = []
 				break
 
 	return line_tokens
