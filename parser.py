@@ -90,7 +90,7 @@ class Parser(object):
 						tok_type = Token.KEYWORD
 					else:
 						tok_type = Token.PLAIN
-					line.append(Token(word+" ", tok_type))
+					line.append(Token(word, tok_type))
 				line_tokens.append(line)
 			#add comments
 			lines_commented = add_comments(line_tokens)
@@ -118,7 +118,7 @@ def add_comments(line_tokens):
 
 			#flatten the rest of the list if there's a comment
 			if(start_comment):
-				line[i].text = ''.join([tok.text for tok in line[i:]])
+				line[i].text = ' '.join([tok.text for tok in line[i:]])
 				line[i+1:] = []
 				break
 

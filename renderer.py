@@ -104,7 +104,7 @@ class Renderer(object):
 			f.write(classHeader % (className, rootDir, className))
 			for line in classData['lines']:
 				f.write('<li>' +
-						''.join([tokenToHTML(token) for token in line]) +
+						' '.join([tokenToHTML(token) for token in line]) +
 						'</li>\n')
 			f.write(classFooter)
 
