@@ -5,6 +5,8 @@ keywords = frozenset(['abstact','assert','boolean','break','byte','case','catch'
 'for','goto','if','implements','import','instanceof','int','interface','long','native','new','package','private','protected','public','return','short','static','strictfp',\
 'super','switch','synchronized','this','throw','throws','transient','try','void','volatile','while'])
 
+methodIDs = frozenset(['public','private','static','abstract','native','final','synchronized','volatile','strictfp'])
+
 """
 Find java files and their associated class files in a directory.
 Returns an iterator of tuple of java filename and class filenames.
@@ -38,6 +40,29 @@ def readConstantPool(lines):
 			break
 	return constants
 
+def readLineNumber(lines):
+	lineNum = [None]
+	instructions = {}
+
+	for line in lines:
+		#start of a method
+		if re.match("("+")|(".join(methodIDs)+")\(.*\);"):
+			i_re = re.match(r"([0-9]*): (.*)\w #([0-9]*).*\/\/\s*(.*)$")
+			if i_re:
+				(i_num,name,c_num) = (m.group(1),m.group(2),m.group(3))
+				instructions.append((i_num,name,c_num))
+
+
+			l_num_re = re.match(r"\sline ([0-9]*) :([0-9]*)",line)
+			if l_num_re:
+				(l_num,i_num) = (m.group(1),m.group(2))
+				constants.append((l_num,))
+			else:
+				break
+	return lineNum
+			
+
+
 """
 Parser
 """
@@ -59,6 +84,7 @@ class Parser(object):
 			sourceData['constants'] = []
 			sourceData['method_refs'] = collections.defaultdict(list)
 			sourceData['lines'] = []
+			line_number_table = []
 
 			for javapFile in javapFiles:
 				#get the main class name
@@ -144,20 +170,24 @@ def add_comments(line_tokens):
 
 	return line_tokens
 
+def print_array_lines(lis):
+	for l in lis: print(l)
 
 if __name__ == '__main__':
 	parser = Parser('java')
 	info = parser.parse()
-	first = next(info)
+	#first = next(info)
 	#print(first['lines'])
-	'''
+	
 	for i in info:
 		print('##############')
-		print('classes')
-		print(str(i['class_names']))
-		print('methods')
-		print(str(i['method_refs']))
-		print('lines')
-		print(str(i['lines']))
-		print()
-	'''
+		print('constants')
+		print_array_lines(i['constants'])
+		#print('classes')
+		#print(str(i['class_names']))
+		#print('methods')
+		#print(str(i['method_refs']))
+		#print('lines')
+		#print(str(i['lines']))
+		print()	
+
