@@ -1,7 +1,7 @@
 
 """
-Renderer
-Converts data about Java classes into HTML pages
+Token
+Represents a unit of Java source code
 """
 class Token(object):
 	# token types
@@ -9,6 +9,10 @@ class Token(object):
 	COMMENT = 1
 	KEYWORD = 2
 	METHOD_INVOCATION = 3
+
+	# method invocation properties
+	class_name = None
+	method_type = None
 
 	token_names = {
 		PLAIN: None,

@@ -1,9 +1,6 @@
 import os, fnmatch, subprocess, itertools, re,collections
 from token import Token
-
-keywords = frozenset(['abstact','assert','boolean','break','byte','case','catch','const','continue','default','do','double','else','enum','extends','final','finally','float',\
-'for','goto','if','implements','import','instanceof','int','interface','long','native','new','package','private','protected','public','return','short','static','strictfp',\
-'super','switch','synchronized','this','throw','throws','transient','try','void','volatile','while'])
+from scanner import scan
 
 """
 Find java files and their associated class files in a directory.
@@ -97,53 +94,17 @@ class Parser(object):
 						else:
 							sourceData['method_refs'][current_class].append(s[0])
 
-			#get the info for each line
 			line_tokens = []
-			for line in open(javaFile):
-				words = line.rstrip().split(' ')
-
+			for toks in scan(open(javaFile)):
 				line = []
-				for i, word in enumerate(words):
-					if i != 0:
-						word = ' ' + word
-					if word.strip() in keywords:
-						tok_type = Token.KEYWORD
-					else:
-						tok_type = Token.PLAIN
-					line.append(Token(word, tok_type))
+				for tok in toks:
+					if tok.tok_type == Token.METHOD_INVOCATION:
+						tok.class_name = 'SomeClass'
+						tok.method_type = 'todo'
+					line.append(tok)
 				line_tokens.append(line)
-			#add comments
-			lines_commented = add_comments(line_tokens)
-			sourceData['lines'] = lines_commented
-
+			sourceData['lines'] = line_tokens
 			yield sourceData
-
-def add_comments(line_tokens):
-	for line in line_tokens:
-		start_comment = False
-		for i in range(len(line)):
-			j = line[i].text.find('//')
-			if j == 0:
-				start_comment = True
-				line[i].tok_type = Token.COMMENT
-			elif j > -1:
-				#split the token to take the '//' part off
-				split_token = line[i].text.split('//')
-				line[i:i+1] = [
-					Token(split_token[0], line[i].tok_type),
-					Token('//'+split_token[1], Token.COMMENT)]
-				start_comment = True
-				# skip the regular token
-				i += 1
-
-			#flatten the rest of the list if there's a comment
-			if(start_comment):
-				line[i].text = ''.join([tok.text for tok in line[i:]])
-				line[i+1:] = []
-				break
-
-	return line_tokens
-
 
 if __name__ == '__main__':
 	parser = Parser('java')

@@ -58,7 +58,7 @@ Get a URL to a class page, relative to another page
 """
 def getClassURL(className, page):
 	classPage = className.replace('.', os.path.sep) + '.html'
-	return os.path.relpath(page, classPage)
+	return os.path.relpath(classPage, page)
 
 """
 Render a token on a page as text/html
@@ -74,8 +74,8 @@ def tokenToHTML(tok, page):
 	if tok.tok_type == Token.METHOD_INVOCATION:
 		# make a link to the declaration of the method
 		rel_file = getClassURL(tok.class_name, page)
-		link = rel_file + '#' + tok.name_and_type
-		return '<a href="' + link + 'class="' + tokType + '">' + text + '</a>'
+		link = rel_file + '#' + tok.method_type
+		return '<a href="' + link + '" class="' + tokType + '">' + text + '</a>'
 	elif tokType:
 		# render a token of a given type
 		return '<span class="' + tokType + '">' + text + '</span>'
