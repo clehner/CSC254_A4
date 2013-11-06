@@ -7,6 +7,7 @@ keywords = frozenset(['abstact','assert','boolean','break','byte','case','catch'
 
 methodIDs = frozenset(['public','private','static','abstract','native','final','synchronized','volatile','strictfp'])
 
+types = frozenset(['int','Integer','double','Double','float','Float','String','char','Character','void'])
 """
 Find java files and their associated class files in a directory.
 Returns an iterator of tuple of java filename and class filenames.
@@ -42,28 +43,22 @@ def readConstantPool(lines):
 
 def readInstructions(lines):
 	instructions = collections.defaultdict(list)
-
 	for line in lines:
-		
-			m_inst = re.match(r"\s*([0-9]*): ([^\s]*)\s*(?#[0-9]*)\s*\/\/\s*(.*))?$",line) 
-			if m_inst:
-				instructions[m_inst.group(1)] = [m_inst.group(2),m_inst.group(3),m_inst.group(4)]
-			else:
-				break
-
-	instructions['test'] = ['t1','t2']
-	return instructions
-def readLineNumber(lines,constants):
-	lineNum = [None]
-
-	for line in lines:#for i in range(0,lines):
-		#start of a method
-		#if re.match("("+")|(".join(methodIDs)+")*\(.*\);",line):
-		
-		#loop through and build the instruction table
-		if line == "LineNumberTable":
-			m_inst = re.match(r"\s*([0-9]*): ([^\s]*)\s*(?#[0-9]*)\s*\/\/\s*(.*))?$",line) 
+		#matching an instruction
+		m_inst = re.match(r"^\s*([0-9]*): (.*)\s*(#[0-9]*)?\s*(\/\/\s*(.*);)?$",line) 
+		if m_inst:
+			print('match instruction')
 			instructions[m_inst.group(1)] = [m_inst.group(2),m_inst.group(3),m_inst.group(4)]
+		#when we've hit the line number table, stop
+		elif re.match("^\s*LineNumberTable:\s*$",line):
+			return instructions
+
+
+def readLineTable(lines,instructions,constants):
+	lineNum = [None]
+	for line in lines:#for i in range(0,lines):
+		m_inst = re.match(r"\s*([0-9]*): ([^\s]*)\s*(?#[0-9]*)\s*\/\/\s*(.*))?$",line) 
+		instructions[m_inst.group(1)] = [m_inst.group(2),m_inst.group(3),m_inst.group(4)]
 
 		#loop through and build the line number table	
 		l_num_re = re.match(r"\sline ([0-9]*) :([0-9]*)",line)
@@ -107,15 +102,18 @@ class Parser(object):
 						sourceData['class_name'] = m.group(1)
 						break
 
-				#get constant pool
 				for line in javapFile:
+					#get constant pool
 					if line == "Constant pool:\n":
 						sourceData['constants'] = readConstantPool(javapFile)
-					mIDs = "(("+")|(".join(methodIDs)+" ))"
-					print("\s*"+mIDs+"*\(.*\);")
-					if re.match("\s*"+mIDs+"*\(.*\);",line):
-						print('matching')
+					#get the instruction list for a given method
+					mID_re =  "(("+"|".join(methodIDs)+") )*"
+					type_re = "(("+"|".join(types)    +") )?"
+					if re.match("^\s*"+mID_re+type_re+".*\((.*)\);$",line):
 						sourceData['instructions'] = readInstructions(javapFile)
+					#get the line table (should happen right after instructions)
+					if re.match("^\s*LineNumberTable:\s*$",line):
+						sourceData['line_table'] = readLineTable(javapFile,sourceData['instructions'],sourceData['constants'])
 
 				'''
 				#loop through javap, collect class data
@@ -191,18 +189,20 @@ def add_comments(line_tokens):
 
 def print_array_lines(lis):
 	for l in lis: print(l)
+def print_dic(dic):
+	for key,value in dic.items():
+		print(key," : ",value)
 
 if __name__ == '__main__':
 	parser = Parser('java')
 	info = parser.parse()
-	#first = next(info)
-	#print(first['lines'])
-	
-	print("(("+")|(".join(methodIDs)+"))")
+	first = next(info)
+	print_dic(first['instructions'])
+	'''	
 	for i in info:
 		print('##############')
 		print('instructions')
-		print_array_lines(i['instructions'])
+		print(i['instructions'])
 		#print('classes')
 		#print(str(i['class_names']))
 		#print('methods')
@@ -210,4 +210,4 @@ if __name__ == '__main__':
 		#print('lines')
 		#print(str(i['lines']))
 		print()	
-
+	'''
