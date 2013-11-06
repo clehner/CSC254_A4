@@ -40,12 +40,21 @@ def readConstantPool(lines):
 			break
 	return constants
 
-#get line number function goes through whole file
-#construct tables one method at a time
+def readInstructions(lines):
+	instructions = collections.defaultdict(list)
 
+	for line in lines:
+		
+			m_inst = re.match(r"\s*([0-9]*): ([^\s]*)\s*(?#[0-9]*)\s*\/\/\s*(.*))?$",line) 
+			if m_inst:
+				instructions[m_inst.group(1)] = [m_inst.group(2),m_inst.group(3),m_inst.group(4)]
+			else:
+				break
+
+	instructions['test'] = ['t1','t2']
+	return instructions
 def readLineNumber(lines,constants):
 	lineNum = [None]
-	instructions = collections.defaultdict(list)
 
 	for line in lines:#for i in range(0,lines):
 		#start of a method
@@ -88,6 +97,7 @@ class Parser(object):
 			sourceData['method_refs'] = collections.defaultdict(list)
 			sourceData['lines'] = []
 			sourceData['line_table'] = []
+			sourceData['instructions'] = collections.defaultdict(list)
 
 			for javapFile in javapFiles:
 				#get the main class name
@@ -102,7 +112,9 @@ class Parser(object):
 					if line == "Constant pool:\n":
 						sourceData['constants'] = readConstantPool(javapFile)
 						break
-					sourceData['line_table'] = readLineNumber(javapFile,sourceData['constants'])
+					if re.match("("+")|(".join(methodIDs)+")*\(.*\);",line):
+						print('matching')
+						sourceData['instructions'] = readInstructions(javapFile)
 
 				'''
 				#loop through javap, collect class data
@@ -187,8 +199,8 @@ if __name__ == '__main__':
 	
 	for i in info:
 		print('##############')
-		print('line table')
-		print_array_lines(i['line_table'])
+		print('instructions')
+		print_array_lines(i['instructions'])
 		#print('classes')
 		#print(str(i['class_names']))
 		#print('methods')
