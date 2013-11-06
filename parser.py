@@ -111,8 +111,7 @@ class Parser(object):
 				for line in javapFile:
 					if line == "Constant pool:\n":
 						sourceData['constants'] = readConstantPool(javapFile)
-						break
-					if re.match("("+")|(".join(methodIDs)+")*\(.*\);",line):
+					if re.match("\s*("+")|(".join(methodIDs)+")*\(.*\);",line):
 						print('matching')
 						sourceData['instructions'] = readInstructions(javapFile)
 
