@@ -56,16 +56,28 @@ def readInstructions(lines):
 
 def readLineTable(lines,instructions,constants):
 	lineNum = [None]
-	for line in lines:#for i in range(0,lines):
-		m_inst = re.match(r"\s*([0-9]*): ([^\s]*)\s*(?#[0-9]*)\s*\/\/\s*(.*))?$",line) 
-		instructions[m_inst.group(1)] = [m_inst.group(2),m_inst.group(3),m_inst.group(4)]
-
+	prev= [None]
+	for line in lines:
 		#loop through and build the line number table	
 		l_num_re = re.match(r"\sline ([0-9]*) :([0-9]*)",line)
-		while l_num_re:
-			(l_num,i_num) = (m.group(1),m.group(2))
-			lineNum.append((l_num,i_num))
-		return lineNum
+		if l_num_re:
+			last_instruction = m.group(2)
+			if not prev == [None]:	
+				first_instruction = prev[1]
+				#go through instructions, get constants
+				for i in range(first_instruction,last_instruction-1):
+					inst_constants = []
+					#check if instruction is presetn
+					if i in instructions:
+						#check if that instruction is in constant table
+						constant = instructions[3]
+						if instructions[3] != None:
+							#check if that constant is a method/class
+							if constants[constant][0] == 'Class':
+								inst_constants.append(constants[constant][1]
+								
+					lineNum[int(m.group(1))] = inst_constants	
+			prev = (m.group(1),m.group(2))
 	return lineNum
 			
 
@@ -197,7 +209,7 @@ if __name__ == '__main__':
 	parser = Parser('java')
 	info = parser.parse()
 	first = next(info)
-	print_dic(first['instructions'])
+	print_dic(first['line_table'])
 	'''	
 	for i in info:
 		print('##############')
