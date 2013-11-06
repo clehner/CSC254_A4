@@ -40,25 +40,32 @@ def readConstantPool(lines):
 			break
 	return constants
 
-def readLineNumber(lines):
+#get line number function goes through whole file
+#construct tables one method at a time
+
+def readLineNumber(lines,constants):
 	lineNum = [None]
-	instructions = {}
+	instructions = collections.defaultdict(list)
 
-	for line in lines:
+	for i in range(0,lines):
 		#start of a method
-		if re.match("("+")|(".join(methodIDs)+")\(.*\);"):
-			i_re = re.match(r"([0-9]*): (.*)\w #([0-9]*).*\/\/\s*(.*)$")
-			if i_re:
-				(i_num,name,c_num) = (m.group(1),m.group(2),m.group(3))
-				instructions.append((i_num,name,c_num))
+		if re.match("("+")|(".join(methodIDs)+")*\(.*\);",lines[i] and 
+			re.match("^\s*$",lines[i-1])):
 
+			#loop through and build the instruction table
+			j = i
+			while(lines[j] != "LineNumberTable"):
+				m_inst = re.match(r"\s*([0-9]*): ([^\s]*)\s*(?#[0-9]*)\s*\/\/\s*(.*))?$",lines[j]) 
+				instructions[m_inst.group(1)] = [m_inst.group(2),m_inst.group(3),m_inst.group(4)]
+				j+=1
 
-			l_num_re = re.match(r"\sline ([0-9]*) :([0-9]*)",line)
-			if l_num_re:
+			#loop through and build the line number table	
+			l_num_re = re.match(r"\sline ([0-9]*) :([0-9]*)",line[j])
+			while l_num_re:
 				(l_num,i_num) = (m.group(1),m.group(2))
-				constants.append((l_num,))
-			else:
-				break
+				lineNum = (l_num,i_num)
+				j+=1
+			i = j
 	return lineNum
 			
 
@@ -181,8 +188,8 @@ if __name__ == '__main__':
 	
 	for i in info:
 		print('##############')
-		#print('constants')
-		#print_array_lines(i['constants'])
+		print('constants')
+		print_array_lines(i['constants'])
 		#print('classes')
 		#print(str(i['class_names']))
 		#print('methods')
