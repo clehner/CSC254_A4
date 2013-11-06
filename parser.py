@@ -47,25 +47,21 @@ def readLineNumber(lines,constants):
 	lineNum = [None]
 	instructions = collections.defaultdict(list)
 
-	for i in range(0,lines):
+	for line in lines:#for i in range(0,lines):
 		#start of a method
-		if re.match("("+")|(".join(methodIDs)+")*\(.*\);",lines[i] and 
-			re.match("^\s*$",lines[i-1])):
+		#if re.match("("+")|(".join(methodIDs)+")*\(.*\);",line):
+		
+		#loop through and build the instruction table
+		if line == "LineNumberTable":
+			m_inst = re.match(r"\s*([0-9]*): ([^\s]*)\s*(?#[0-9]*)\s*\/\/\s*(.*))?$",line) 
+			instructions[m_inst.group(1)] = [m_inst.group(2),m_inst.group(3),m_inst.group(4)]
 
-			#loop through and build the instruction table
-			j = i
-			while(lines[j] != "LineNumberTable"):
-				m_inst = re.match(r"\s*([0-9]*): ([^\s]*)\s*(?#[0-9]*)\s*\/\/\s*(.*))?$",lines[j]) 
-				instructions[m_inst.group(1)] = [m_inst.group(2),m_inst.group(3),m_inst.group(4)]
-				j+=1
-
-			#loop through and build the line number table	
-			l_num_re = re.match(r"\sline ([0-9]*) :([0-9]*)",line[j])
-			while l_num_re:
-				(l_num,i_num) = (m.group(1),m.group(2))
-				lineNum = (l_num,i_num)
-				j+=1
-			i = j
+		#loop through and build the line number table	
+		l_num_re = re.match(r"\sline ([0-9]*) :([0-9]*)",line)
+		while l_num_re:
+			(l_num,i_num) = (m.group(1),m.group(2))
+			lineNum.append((l_num,i_num))
+		return lineNum
 	return lineNum
 			
 
@@ -91,7 +87,7 @@ class Parser(object):
 			sourceData['constants'] = []
 			sourceData['method_refs'] = collections.defaultdict(list)
 			sourceData['lines'] = []
-			line_number_table = []
+			sourceData['line_table'] = []
 
 			for javapFile in javapFiles:
 				#get the main class name
@@ -105,7 +101,10 @@ class Parser(object):
 				for line in javapFile:
 					if line == "Constant pool:\n":
 						sourceData['constants'] = readConstantPool(javapFile)
+						break
+					sourceData['line_table'] = readLineNumber(javapFile,sourceData['constants'])
 
+				'''
 				#loop through javap, collect class data
 				#get class name, methods used from javap file
 				current_class= ''
@@ -129,8 +128,8 @@ class Parser(object):
 							sourceData['method_refs'][s[0]].append(s[1])
 						else:
 							sourceData['method_refs'][current_class].append(s[0])
-
-			#get the info for each line
+				'''	
+			#get the info for each line in the source files
 			line_tokens = []
 			for line in open(javaFile):
 				words = line.rstrip().split(' ')
@@ -188,8 +187,8 @@ if __name__ == '__main__':
 	
 	for i in info:
 		print('##############')
-		print('constants')
-		print_array_lines(i['constants'])
+		print('line table')
+		print_array_lines(i['line_table'])
 		#print('classes')
 		#print(str(i['class_names']))
 		#print('methods')
