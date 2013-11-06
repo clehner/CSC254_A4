@@ -52,11 +52,11 @@ def readInstructions(lines):
 
 
 def readLineTable(lines,instructions,constants):
-	lineNum = [None]
+	lineNum= collections.defaultdict(list)
 	prev= [None]
 	for line in lines:
 		#loop through and build the line number table	
-		l_num_re = re.match(r"\sline ([0-9]*) :([0-9]*)",line)
+		me = re.match(r"\sline ([0-9]*) :([0-9]*)",line)
 		if l_num_re:
 			last_instruction = m.group(2)
 			if not prev == [None]:	
@@ -71,9 +71,9 @@ def readLineTable(lines,instructions,constants):
 						if instructions[3] != None:
 							#check if that constant is a method/class
 							if constants[constant][0] == 'Class':
-								inst_constants.append(constants[constant][1]
+								inst_constants.append(constants[constant][1])
 								
-					lineNum[int(m.group(1))] = inst_constants	
+					lineNum[m.group(1)] = inst_constants	
 			prev = (m.group(1),m.group(2))
 	return lineNum
 			
@@ -100,7 +100,7 @@ class Parser(object):
 			sourceData['constants'] = []
 			sourceData['method_refs'] = collections.defaultdict(list)
 			sourceData['lines'] = []
-			sourceData['line_table'] = []
+			sourceData['line_table'] = collections.defaultdict(list)
 			sourceData['instructions'] = collections.defaultdict(list)
 
 			for javapFile in javapFiles:
