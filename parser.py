@@ -181,8 +181,8 @@ if __name__ == '__main__':
 	
 	for i in info:
 		print('##############')
-		print('constants')
-		print_array_lines(i['constants'])
+		#print('constants')
+		#print_array_lines(i['constants'])
 		#print('classes')
 		#print(str(i['class_names']))
 		#print('methods')
