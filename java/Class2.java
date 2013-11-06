@@ -9,5 +9,8 @@ public class Class2 {
 
 	public void print_info() {
 		System.out.println(this.info);
+		System.out.println(" /* not a comment */");
+		/* multi-line
+		 * comment */
 	}
 }

@@ -6,7 +6,7 @@ keywords = ['abstact','assert','boolean','break','byte','case','catch','const','
 'super','switch','synchronized','this','throw','throws','transient','try','void','volatile','while']
 
 scanner = re.Scanner([
-	(r'//.+', lambda s, tok: Token(tok, Token.COMMENT)),
+	(r'/[/*].+', lambda s, tok: Token(tok, Token.COMMENT)),
 	(r'\s+', lambda s, tok: Token(tok, Token.PLAIN)),
 	(r'[a-zA-Z0-9_]+(?=\()', lambda s, tok: Token(tok, Token.METHOD_INVOCATION)),
 	(r'[^a-z]', lambda s, tok: Token(tok, Token.PLAIN)),
@@ -25,6 +25,28 @@ without information dependent on javap data
 '''
 def scan(lines):
 	rest = ''
+	in_multiline_comment = False
 	for line in lines:
-		(toks, rest) = scanner.scan(rest + line)
+		if in_multiline_comment:
+			i = line.find("*/") + 2
+			if i == 1:
+				toks = [Token(line, Token.COMMENT)]
+			else:
+				comment = line[:i]
+				line = line[i:]
+				tok = Token(comment, Token.COMMENT)
+				(toks, rest) = scanner.scan(rest + line)
+				toks.insert(0, tok)
+
+				in_multiline_comment = False
+		else:
+			(toks, rest) = scanner.scan(rest + line)
+			if len(toks) > 2:
+				last_tok = toks[-2]
+				print("tokss"+repr(last_tok))
+				if last_tok.tok_type == Token.COMMENT and last_tok.text[:2] == '/*':
+					print("in_multi_line")
+					in_multiline_comment = True
+
+			#print("toks: " + str(toks) + ", rest: " + rest)
 		yield toks
