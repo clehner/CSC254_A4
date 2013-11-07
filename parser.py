@@ -6,6 +6,15 @@ methodIDs = frozenset(['public','private','static','abstract','native','final','
 
 types = frozenset(['int','Integer','double','Double','float','Float','String','char','Character','void'])
 
+method_scanner = re.Scanner([
+#todo: add more arg types to read with this regex
+	("\(", None),
+	("\).*", None),
+	(r"D",lambda s,tok: 'double'),
+	(r"L(.*?);",lambda s,tok: tok[1:-1].replace('/', '.')),
+	(r"I",lambda s,tok: 'int'),
+])
+
 """
 Find java files and their associated class files in a directory.
 Returns an iterator of tuple of java filename and class filenames.
@@ -104,8 +113,12 @@ def find_method_invocation(line_num, method_name, source_data):
 			const = parse_constant(constants, inst[1])
 			(class_name, (name, method_type)) = const
 			if method_name == name:
-				return (class_name, method_type)
+				return (class_name,parse_method_type( method_type))
 	return None
+
+def parse_method_type(method_type):
+	types = method_scanner.scan(method_type)[0]
+	return '(' + ', '.join(types) + ')'
 
 def annotate_token(tok, line_num, source_data):
 	if tok.tok_type == Token.METHOD_UNKNOWN:
@@ -215,7 +228,6 @@ if __name__ == '__main__':
 	parser = Parser('java')
 	info = parser.parse()
 	first = next(info)
-	print('line_table')
 	#print_array_lines(first['constants'])
 	print_dic(first['line_table'])
 	'''	

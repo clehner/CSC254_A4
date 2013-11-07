@@ -58,6 +58,9 @@ Get a URL to a class page, relative to another page
 """
 def getClassURL(className, page):
 	classPage = className.replace('.', os.path.sep) + '.html'
+	print('classPage ',classPage)
+	if 'java' in className:
+		return 'http://docs.oracle.com/javase/7/docs/api/' + classPage
 	return os.path.relpath(classPage, page)
 
 """
@@ -74,7 +77,7 @@ def tokenToHTML(tok, page):
 	if tok.tok_type == Token.METHOD_INVOCATION:
 		# make a link to the declaration of the method
 		rel_file = getClassURL(tok.class_name, page)
-		link = rel_file + '#' + tok.text + ":" + tok.method_type
+		link = rel_file + '#' + tok.text + tok.method_type
 		return '<a href="' + link + '" class="' + tokType + '">' + text + '</a>'
 	elif tok.tok_type == Token.METHOD_DECLARATION:
 		# make an anchor for the declaration, that can be linked to
