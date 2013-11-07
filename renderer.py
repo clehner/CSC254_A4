@@ -118,7 +118,8 @@ class Renderer(object):
 	Create and write an HTML page for a Java class
 	"""
 	def renderClass(self, classData):
-		className = classData['class_names'][0]
+		# get the primary classname
+		className = min(classData['class_names'], key=len)
 		print "Rendering " + className
 		dirs = className.split('.')
 		page = os.path.join(self.path, *dirs)+'.html'

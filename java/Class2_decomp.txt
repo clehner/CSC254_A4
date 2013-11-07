@@ -1,44 +1,56 @@
 Classfile /home/hoover/u3/clehner/2013f/csc254/a4/java/Class2.class
-  Last modified Nov 6, 2013; size 480 bytes
-  MD5 checksum ff5273e774f7f90199a290774663e779
+  Last modified Nov 7, 2013; size 599 bytes
+  MD5 checksum 2a17c82d45971f4304241a6f2f693f98
   Compiled from "Class2.java"
 public class Class2
   SourceFile: "Class2.java"
+  InnerClasses:
+       public #11= #3 of #9; //Nesty=class Class2$Nesty of class Class2
   minor version: 0
   major version: 51
   flags: ACC_PUBLIC, ACC_SUPER
 Constant pool:
-   #1 = Methodref          #7.#18         //  java/lang/Object."<init>":()V
-   #2 = Fieldref           #6.#19         //  Class2.info:Ljava/lang/String;
-   #3 = Fieldref           #20.#21        //  java/lang/System.out:Ljava/io/PrintStream;
-   #4 = Methodref          #22.#23        //  java/io/PrintStream.println:(Ljava/lang/String;)V
-   #5 = String             #24            //   /* not a comment */
-   #6 = Class              #25            //  Class2
-   #7 = Class              #26            //  java/lang/Object
-   #8 = Utf8               info
-   #9 = Utf8               Ljava/lang/String;
-  #10 = Utf8               <init>
-  #11 = Utf8               (Ljava/lang/String;)V
-  #12 = Utf8               Code
-  #13 = Utf8               LineNumberTable
-  #14 = Utf8               print_info
-  #15 = Utf8               ()V
-  #16 = Utf8               SourceFile
-  #17 = Utf8               Class2.java
-  #18 = NameAndType        #10:#15        //  "<init>":()V
-  #19 = NameAndType        #8:#9          //  info:Ljava/lang/String;
-  #20 = Class              #27            //  java/lang/System
-  #21 = NameAndType        #28:#29        //  out:Ljava/io/PrintStream;
-  #22 = Class              #30            //  java/io/PrintStream
-  #23 = NameAndType        #31:#11        //  println:(Ljava/lang/String;)V
-  #24 = Utf8                /* not a comment */
-  #25 = Utf8               Class2
-  #26 = Utf8               java/lang/Object
-  #27 = Utf8               java/lang/System
-  #28 = Utf8               out
-  #29 = Utf8               Ljava/io/PrintStream;
-  #30 = Utf8               java/io/PrintStream
-  #31 = Utf8               println
+   #1 = Methodref          #10.#23        //  java/lang/Object."<init>":()V
+   #2 = Fieldref           #9.#24         //  Class2.info:Ljava/lang/String;
+   #3 = Class              #25            //  Class2$Nesty
+   #4 = Methodref          #3.#26         //  Class2$Nesty."<init>":(LClass2;)V
+   #5 = Methodref          #3.#27         //  Class2$Nesty.print_nest:()V
+   #6 = Fieldref           #28.#29        //  java/lang/System.out:Ljava/io/PrintStream;
+   #7 = Methodref          #30.#31        //  java/io/PrintStream.println:(Ljava/lang/String;)V
+   #8 = String             #32            //   /* not a comment */
+   #9 = Class              #33            //  Class2
+  #10 = Class              #34            //  java/lang/Object
+  #11 = Utf8               Nesty
+  #12 = Utf8               InnerClasses
+  #13 = Utf8               info
+  #14 = Utf8               Ljava/lang/String;
+  #15 = Utf8               <init>
+  #16 = Utf8               (Ljava/lang/String;)V
+  #17 = Utf8               Code
+  #18 = Utf8               LineNumberTable
+  #19 = Utf8               print_info
+  #20 = Utf8               ()V
+  #21 = Utf8               SourceFile
+  #22 = Utf8               Class2.java
+  #23 = NameAndType        #15:#20        //  "<init>":()V
+  #24 = NameAndType        #13:#14        //  info:Ljava/lang/String;
+  #25 = Utf8               Class2$Nesty
+  #26 = NameAndType        #15:#35        //  "<init>":(LClass2;)V
+  #27 = NameAndType        #36:#20        //  print_nest:()V
+  #28 = Class              #37            //  java/lang/System
+  #29 = NameAndType        #38:#39        //  out:Ljava/io/PrintStream;
+  #30 = Class              #40            //  java/io/PrintStream
+  #31 = NameAndType        #41:#16        //  println:(Ljava/lang/String;)V
+  #32 = Utf8                /* not a comment */
+  #33 = Utf8               Class2
+  #34 = Utf8               java/lang/Object
+  #35 = Utf8               (LClass2;)V
+  #36 = Utf8               print_nest
+  #37 = Utf8               java/lang/System
+  #38 = Utf8               out
+  #39 = Utf8               Ljava/io/PrintStream;
+  #40 = Utf8               java/io/PrintStream
+  #41 = Utf8               println
 {
   java.lang.String info;
     flags: 
@@ -46,32 +58,38 @@ Constant pool:
   public Class2(java.lang.String);
     flags: ACC_PUBLIC
     Code:
-      stack=2, locals=2, args_size=2
+      stack=3, locals=2, args_size=2
          0: aload_0       
          1: invokespecial #1                  // Method java/lang/Object."<init>":()V
          4: aload_0       
          5: aload_1       
          6: putfield      #2                  // Field info:Ljava/lang/String;
-         9: return        
+         9: new           #3                  // class Class2$Nesty
+        12: dup           
+        13: aload_0       
+        14: invokespecial #4                  // Method Class2$Nesty."<init>":(LClass2;)V
+        17: invokevirtual #5                  // Method Class2$Nesty.print_nest:()V
+        20: return        
       LineNumberTable:
         line 6: 0
         line 7: 4
         line 8: 9
+        line 9: 20
 
   public void print_info();
     flags: ACC_PUBLIC
     Code:
       stack=2, locals=1, args_size=1
-         0: getstatic     #3                  // Field java/lang/System.out:Ljava/io/PrintStream;
+         0: getstatic     #6                  // Field java/lang/System.out:Ljava/io/PrintStream;
          3: aload_0       
          4: getfield      #2                  // Field info:Ljava/lang/String;
-         7: invokevirtual #4                  // Method java/io/PrintStream.println:(Ljava/lang/String;)V
-        10: getstatic     #3                  // Field java/lang/System.out:Ljava/io/PrintStream;
-        13: ldc           #5                  // String  /* not a comment */
-        15: invokevirtual #4                  // Method java/io/PrintStream.println:(Ljava/lang/String;)V
+         7: invokevirtual #7                  // Method java/io/PrintStream.println:(Ljava/lang/String;)V
+        10: getstatic     #6                  // Field java/lang/System.out:Ljava/io/PrintStream;
+        13: ldc           #8                  // String  /* not a comment */
+        15: invokevirtual #7                  // Method java/io/PrintStream.println:(Ljava/lang/String;)V
         18: return        
       LineNumberTable:
-        line 11: 0
-        line 12: 10
-        line 15: 18
+        line 12: 0
+        line 13: 10
+        line 16: 18
 }

@@ -2,9 +2,11 @@ import os, fnmatch, subprocess, itertools, re,collections
 from token import Token
 from scanner import scan
 
-methodIDs = frozenset(['public','private','static','abstract','native','final','synchronized','volatile','strictfp'])
-
-types = frozenset(['int','Integer','double','Double','float','Float','String','char','Character','void'])
+methodIDs = ['public','private','static','abstract','native','final','synchronized','volatile','strictfp']
+types = ['int','Integer','double','Double','float','Float','String','char','Character','void']
+mID_re =  "(?:(?:"+"|".join(methodIDs)+") )*"
+type_re = "(?:(?:"+"|".join(types)    +") )?"
+class_declaration_re = "^\s*"+mID_re+type_re+"([^ ]*)(\(.*\));$"
 
 method_scanner = re.Scanner([
 #todo: add more arg types to read with this regex
@@ -115,7 +117,11 @@ def find_method_invocation(line_num, method_name, source_data):
 			const = parse_constant(constants, inst[1])
 			(class_name, (name, method_type)) = const
 			if method_name == name:
+				print('matched name', method_name)
 				return (class_name,parse_method_type( method_type))
+			else:
+				print('incorrect name', method_name, name)
+	print('instructions', instructions)
 	return None
 
 def find_method_declaration(line_num, method_name, source_data):
@@ -135,11 +141,15 @@ def annotate_token(tok, line_num, source_data):
 			tok.tok_type = Token.METHOD_INVOCATION
 			(tok.class_name, tok.method_type) = m
 		else:
-			#it's a declaration, not invocation
+			# it's a declaration, not invocation
 			m = find_method_declaration(line_num, tok.text, source_data)
 			if m:
 				(tok.class_name, tok.method_type) = m
 				tok.tok_type = Token.METHOD_DECLARATION
+			else:
+				tok.tok_type = Token.PLAIN
+				print("unknown method thing \"" + tok.text +
+						"\" on line "+str(line_num))
 
 """
 Parser
@@ -156,7 +166,6 @@ class Parser(object):
 	def parse(self):
 		for (javaFile, classFiles) in findJavaFiles(self.path):
 			#initialization junk
-			javapFiles = [javap(file) for file in classFiles]
 			sourceData = {}
 			sourceData['class_names'] = []
 			sourceData['constants'] = []
@@ -164,7 +173,8 @@ class Parser(object):
 			sourceData['lines'] = []
 			sourceData['line_table'] = collections.defaultdict(list)
 
-			for javapFile in javapFiles:
+			for classFile in classFiles:
+				javapFile = javap(classFile)
 				#get the main class name
 				for line in javapFile:
 					m = re.match(r"^.*class (.+)$", line)
@@ -181,9 +191,7 @@ class Parser(object):
 
 				for line in javapFile:
 					#get the instruction list for a given method
-					mID_re =  "(?:(?:"+"|".join(methodIDs)+") )*"
-					type_re = "(?:(?:"+"|".join(types)    +") )?"
-					m = re.match("^\s*"+mID_re+type_re+"([^ ]*)(\(.*\));$",line)
+					m = re.match(class_declaration_re,line)
 					if m:
 						(method_name, m_types) = (m.group(1), m.group(2))
 						prev_line_num = len(sourceData['line_table'])
