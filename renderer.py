@@ -11,6 +11,7 @@ indexHeader = """<!doctype html>
 	<meta charset="utf-8">
 	<title>Java Cross-Indexer</title>
 	<link rel="stylesheet" href="static/style.css" type="text/css">
+	<script src="static/highlight.js"></script>
 </head>
 <body>
 	<h1>Java Cross-Indexer</h1>
@@ -34,6 +35,7 @@ classHeader = """<!doctype html>
 	<meta charset="utf-8">
 	<title>%s</title>
 	<link rel="stylesheet" href="%sstatic/style.css" type="text/css">
+	<script src="static/highlight.js"></script>
 </head>
 <body>
 	<h1>%s</h1>
