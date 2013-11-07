@@ -56,32 +56,27 @@ def readInstructions(lines):
 
 def readLineTable(lines,instructions,constants):
 	line_table = collections.defaultdict(list)
-	print('right place')
-	prev= [None]
+	prev = [0, 0]
 	for line in lines:
 		#loop through and build the line number table	
 		m = re.match(r"\s*line ([0-9]*): ([0-9]*)",line)
 		if m:
+			curr = (line_num, i_num) = (int(m.group(1)), int(m.group(2)))
 			#print('groups- ',m.group(1),m.group(2))
-			last_instruction = int(m.group(2))
+			last_instruction = i_num
 			if not prev == [None]:	
-				first_instruction = int(prev[1])
-				print('instruction range',first_instruction," : ",last_instruction)
+				first_instruction = prev[1]
 				#go through instructions, get constants
 				for i in range(first_instruction,last_instruction-1):
 					inst_constants = []
 					#check if instruction is presetn
 					if i in instructions:
-						line_table[m.group(1)].append(instructions[i])
-			prev = (m.group(1),m.group(2))
+						line_table[line_num].append(instructions[i])
+			prev = curr
 		else:
-			line_table[prev[2]].append(['return'])
+			line_table[prev[1]].append(['return'])
 			break
-	print('printing line table')
-	print_dic(line_table)
 	return line_table
-			
-
 
 """
 Parser
