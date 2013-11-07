@@ -8,8 +8,9 @@ class Token(object):
 	PLAIN = 0
 	COMMENT = 1
 	KEYWORD = 2
-	METHOD_INVOCATION = 3
-	METHOD_DECLARATION = 4
+	METHOD_UNKNOWN = 3
+	METHOD_INVOCATION = 4
+	METHOD_DECLARATION = 5
 
 	# method invocation/declaration properties
 	method_type = None
@@ -19,6 +20,7 @@ class Token(object):
 		PLAIN: None,
 		COMMENT: "comment",
 		KEYWORD: "keyword",
+		METHOD_UNKNOWN: "method-unknown",
 		METHOD_INVOCATION: "method-invocation",
 		METHOD_DECLARATION: "method-declaration"
 	}

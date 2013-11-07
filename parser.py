@@ -78,6 +78,28 @@ def readLineTable(lines,instructions,constants):
 			break
 	return line_table
 
+def find_method_invocation(line_num, method_name, source_data):
+	instructions = source_data['line_table'][line_num]
+	constants = source_data['constants']
+	class_name = "Class"
+	method_type = "todo"
+	print("line_num", line_num)
+	print("instr", source_data['line_table'])
+	return (class_name, method_type)
+
+def annotate_token(tok, line_num, source_data):
+	if tok.tok_type == Token.METHOD_UNKNOWN:
+		m = find_method_invocation(line_num, tok.text, source_data)
+		if m:
+			tok.tok_type = Token.METHOD_INVOCATION
+			(tok.class_name, tok.method_type) = m
+		else:
+			#it's a declaration, not invocation
+			tok.tok_type = Token.METHOD_DECLARATION
+			tok.class_name = 'Declaration'
+			tok.method_type = 'todo'
+		
+
 """
 Parser
 """
@@ -127,20 +149,15 @@ class Parser(object):
 					if re.match("^\s*LineNumberTable:\s*$",line):
 						sourceData['line_table'] = readLineTable(javapFile,sourceData['instructions'],sourceData['constants'])
 					'''
-			#I commented these to test the other stuff, feel free to uncomment
-			'''
 			#get the info for each line in the source files
 			line_tokens = []
-			for toks in scan(open(javaFile)):
+			for line_num, toks in enumerate(scan(open(javaFile))):
 				line = []
 				for tok in toks:
-					if tok.tok_type == Token.METHOD_INVOCATION:
-						tok.class_name = 'SomeClass'
-						tok.method_type = 'todo'
+					annotate_token(tok, line_num, sourceData)
 					line.append(tok)
 				line_tokens.append(line)
 			sourceData['lines'] = line_tokens
-			'''
 			yield sourceData
 
 

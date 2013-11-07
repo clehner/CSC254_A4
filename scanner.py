@@ -10,7 +10,7 @@ scanner = re.Scanner([
 	(r'/[/*].*', lambda s, tok: Token(tok, Token.COMMENT)),
 	(r'\s+', lambda s, tok: Token(tok, Token.PLAIN)),
 	('(?:' + '|'.join(keywords) + ')(?=[^a-zA-Z0-9_])', lambda s, tok: Token(tok, Token.KEYWORD)),
-	(r'[a-zA-Z0-9_]+(?=\()', lambda s, tok: Token(tok, Token.METHOD_INVOCATION)),
+	(r'[a-zA-Z0-9_]+(?=\()', lambda s, tok: Token(tok, Token.METHOD_UNKNOWN)),
 	(r'[^a-z]', lambda s, tok: Token(tok, Token.PLAIN)),
 	(r'[a-zA-Z0-9_]*', lambda s, tok: Token(tok, Token.PLAIN)),
 ])
