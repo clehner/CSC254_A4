@@ -76,6 +76,10 @@ def tokenToHTML(tok, page):
 		rel_file = getClassURL(tok.class_name, page)
 		link = rel_file + '#' + tok.method_type
 		return '<a href="' + link + '" class="' + tokType + '">' + text + '</a>'
+	elif tok.tok_type == Token.METHOD_DECLARATION:
+		# make an anchor for the declaration, that can be linked to
+		name = tok.method_type
+		return '<a id="' + name + '" class="' + tokType + '">' + text + '</a>'
 	elif tokType:
 		# render a token of a given type
 		return '<span class="' + tokType + '">' + text + '</span>'
@@ -112,17 +116,17 @@ class Renderer(object):
 	"""
 	def renderClass(self, classData):
 		className = classData['class_name']
-		print "Rendering class " + className
+		print "Rendering " + className
 		dirs = className.split('.')
 		page = os.path.join(self.path, *dirs)+'.html'
-		print "Writing " + page
+		path = os.path.dirname(os.path.join(*dirs))
 		ensureDir(page)
 		rootDir = "../" * (len(dirs)-1)
 		with open(page, 'w') as f:
 			f.write(classHeader % (className, rootDir, className))
 			for line in classData['lines']:
 				f.write('<li>' +
-						''.join([tokenToHTML(token, page) for token in line]) +
+						''.join([tokenToHTML(token, path) for token in line]) +
 						'</li>\n')
 			f.write(classFooter)
 

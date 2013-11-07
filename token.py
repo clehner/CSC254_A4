@@ -9,16 +9,18 @@ class Token(object):
 	COMMENT = 1
 	KEYWORD = 2
 	METHOD_INVOCATION = 3
+	METHOD_DECLARATION = 4
 
-	# method invocation properties
-	class_name = None
+	# method invocation/declaration properties
 	method_type = None
+	class_name = None
 
 	token_names = {
 		PLAIN: None,
 		COMMENT: "comment",
 		KEYWORD: "keyword",
-		METHOD_INVOCATION: "method-invocation"
+		METHOD_INVOCATION: "method-invocation",
+		METHOD_DECLARATION: "method-declaration"
 	}
 
 	def __init__(self, text, tok_type=PLAIN):

@@ -52,11 +52,12 @@ def readInstructions(lines):
 
 def readLineTable(lines,instructions,constants):
 	line_table = collections.defaultdict(list)
+	print('right place')
 	prev= [None]
 	for line in lines:
 		#loop through and build the line number table	
-		me = re.match(r"\sline ([0-9]*) :([0-9]*)",line)
-		if l_num_re:
+		m = re.match(r"\sline ([0-9]*) :([0-9]*)",line)
+		if m:
 			last_instruction = m.group(2)
 			if not prev == [None]:	
 				first_instruction = prev[1]
@@ -124,7 +125,7 @@ class Parser(object):
 					#get the line table (should happen right after instructions)
 					if re.match("^\s*LineNumberTable:\s*$",line):
 						sourceData['line_table'] = readLineTable(javapFile,sourceData['instructions'],sourceData['constants'])
-
+			#I commented these to test the other stuff, feel free to uncomment
 			'''
 			#get the info for each line in the source files
 			line_tokens = []
@@ -175,9 +176,9 @@ if __name__ == '__main__':
 	parser = Parser('java')
 	info = parser.parse()
 	first = next(info)
-	print('instructions')
+	print('line_table')
 	#print_array_lines(first['constants'])
-	print_dic(first['instructions'])
+	print_dic(first['line_table'])
 	'''	
 	for i in info:
 		print('##############')

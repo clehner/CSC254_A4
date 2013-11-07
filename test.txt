@@ -1,0 +1,6 @@
+instructions
+('0', ' : ', ['getstatic', '#3', 'Field java/lang/System.out:Ljava/io/PrintStream;'])
+('3', ' : ', ['aload_0', None, None])
+('4', ' : ', ['getfield', '#2', 'Field info:Ljava/lang/String;'])
+('7', ' : ', ['invokevirtual', '#4', 'Method java/io/PrintStream.println:(Ljava/lang/String;)V'])
+('10', ' : ', ['return', None, None])
