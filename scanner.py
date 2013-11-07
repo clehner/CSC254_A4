@@ -19,7 +19,6 @@ scanner = re.Scanner([
 Scan lines into tokens.
 takes a generator of strings
 returns a generator of lists of tokens,
-return a generator of tuple (token type, string)
 without information dependent on javap data
 '''
 def scan(lines):
@@ -44,6 +43,4 @@ def scan(lines):
 				last_tok = toks[-1]
 				if last_tok.tok_type == Token.COMMENT and last_tok.text[:2] == '/*':
 					in_multiline_comment = True
-
-			#print("toks: " + str(toks) + ", rest: " + rest)
 		yield toks
