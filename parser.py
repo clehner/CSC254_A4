@@ -5,6 +5,7 @@ from scanner import scan
 methodIDs = frozenset(['public','private','static','abstract','native','final','synchronized','volatile','strictfp'])
 
 types = frozenset(['int','Integer','double','Double','float','Float','String','char','Character','void'])
+
 """
 Find java files and their associated class files in a directory.
 Returns an iterator of tuple of java filename and class filenames.
@@ -28,11 +29,18 @@ def javap(file):
 	return iter(proc.stdout.readline, '')
 
 def readConstantPool(lines):
-	constants = [] # indexed from 1 in javap
-	for line in lines:#                   g1         g2       g3 
-		m = re.match(r"\s*#[0-9]* = ([^\s]*)\s*(.*?)(?:\s*\/\/\s*(.*))?$", line)
+	constants = [None] # indexed from 1 in javap
+	prev_idx = 0
+	for line in lines:#       r1         g2       g3                g4
+		m = re.match(r"\s*#([0-9]*) = ([^\s]*)\s*(.*?)(?:\s*\/\/\s*(.*))?$", line)
 		if m:
-			(name, val, comment) = (m.group(1), m.group(2), m.group(3))
+			(idx, name, val, comment) =\
+				(int(m.group(1)), m.group(2), m.group(3), m.group(4))
+			skip = idx - prev_idx - 1
+			if skip:
+				# fill space for values that take >1 byte
+				constants.extend(None for _ in range(0, skip))
+			prev_idx = idx
 			constants.append((name, val, comment))
 		else:
 			break
@@ -45,7 +53,7 @@ def readInstructions(lines):
 	lines.next()
 	for line in lines:
 		#matching an instruction
-		m_inst = re.match(r"^\s*([0-9]*): ([^\s]*)\s*(#[0-9]*)?(?:\s*\/\/\s*(.*))?$",line) 
+		m_inst = re.match(r"^\s*([0-9]*): ([^\s]*)\s*(.*?)(?:\s*\/\/\s*(.*))?$",line)
 		if m_inst:
 			instructions[int(m_inst.group(1))] = [m_inst.group(2),m_inst.group(3),m_inst.group(4)]
 		#when we've hit the line number table, stop
@@ -54,15 +62,13 @@ def readInstructions(lines):
 	return instructions
 
 
-def readLineTable(lines,instructions,constants):
-	line_table = collections.defaultdict(list)
+def readLineTable(lines,instructions,line_table):
 	prev = [0, 0]
 	for line in lines:
 		#loop through and build the line number table	
 		m = re.match(r"\s*line ([0-9]*): ([0-9]*)",line)
 		if m:
 			curr = (line_num, i_num) = (int(m.group(1)), int(m.group(2)))
-			#print('groups- ',m.group(1),m.group(2))
 			last_instruction = i_num
 			if not prev == [None]:	
 				first_instruction = prev[1]
@@ -71,21 +77,35 @@ def readLineTable(lines,instructions,constants):
 					inst_constants = []
 					#check if instruction is presetn
 					if i in instructions:
-						line_table[line_num].append(instructions[i])
+						line_table[prev[0]].append(instructions[i])
 			prev = curr
 		else:
-			line_table[prev[1]].append(['return'])
+			line_table[prev[0]].append(['return'])
 			break
 	return line_table
+
+def parse_constant(constants, num):
+	num = int(num[1:])
+	(constType, values, comment) = constants[num]
+	if constType == 'Utf8':
+		return values
+	m = re.split(r'[.:]', values)
+	if len(m) == 2:
+		return (parse_constant(constants, m[0]),
+			parse_constant(constants, m[1]))
+	elif len(m) == 1:
+		return parse_constant(constants, m[0])
 
 def find_method_invocation(line_num, method_name, source_data):
 	instructions = source_data['line_table'][line_num]
 	constants = source_data['constants']
-	class_name = "Class"
-	method_type = "todo"
-	print("line_num", line_num)
-	print("instr", source_data['line_table'])
-	return (class_name, method_type)
+	for inst in instructions:
+		if inst[0][:6] == 'invoke':
+			const = parse_constant(constants, inst[1])
+			(class_name, (name, method_type)) = const
+			if method_name == name:
+				return (class_name, method_type)
+	return None
 
 def annotate_token(tok, line_num, source_data):
 	if tok.tok_type == Token.METHOD_UNKNOWN:
@@ -98,7 +118,7 @@ def annotate_token(tok, line_num, source_data):
 			tok.tok_type = Token.METHOD_DECLARATION
 			tok.class_name = 'Declaration'
 			tok.method_type = 'todo'
-		
+
 
 """
 Parser
@@ -122,7 +142,6 @@ class Parser(object):
 			sourceData['method_refs'] = collections.defaultdict(list)
 			sourceData['lines'] = []
 			sourceData['line_table'] = collections.defaultdict(list)
-			sourceData['instructions'] = collections.defaultdict(list)
 
 			for javapFile in javapFiles:
 				#get the main class name
@@ -136,14 +155,15 @@ class Parser(object):
 					#get constant pool
 					if line == "Constant pool:\n":
 						sourceData['constants'] = readConstantPool(javapFile)
+						break
 
+				for line in javapFile:
 					#get the instruction list for a given method
 					mID_re =  "(("+"|".join(methodIDs)+") )*"
 					type_re = "(("+"|".join(types)    +") )?"
 					if re.match("^\s*"+mID_re+type_re+".*\((.*)\);$",line):
-						sourceData['instructions'] = readInstructions(javapFile)
-
-						sourceData['line_table'] = readLineTable(javapFile,sourceData['instructions'],sourceData['constants'])
+						instructions = readInstructions(javapFile)
+						sourceData['line_table'] = readLineTable(javapFile, instructions, sourceData['line_table'])
 					'''
 					#get the line table (should happen right after instructions)
 					if re.match("^\s*LineNumberTable:\s*$",line):
@@ -154,7 +174,7 @@ class Parser(object):
 			for line_num, toks in enumerate(scan(open(javaFile))):
 				line = []
 				for tok in toks:
-					annotate_token(tok, line_num, sourceData)
+					annotate_token(tok, line_num+1, sourceData)
 					line.append(tok)
 				line_tokens.append(line)
 			sourceData['lines'] = line_tokens

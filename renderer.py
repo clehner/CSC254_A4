@@ -74,7 +74,7 @@ def tokenToHTML(tok, page):
 	if tok.tok_type == Token.METHOD_INVOCATION:
 		# make a link to the declaration of the method
 		rel_file = getClassURL(tok.class_name, page)
-		link = rel_file + '#' + tok.method_type
+		link = rel_file + '#' + tok.text + ":" + tok.method_type
 		return '<a href="' + link + '" class="' + tokType + '">' + text + '</a>'
 	elif tok.tok_type == Token.METHOD_DECLARATION:
 		# make an anchor for the declaration, that can be linked to
