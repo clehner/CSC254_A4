@@ -115,6 +115,7 @@ class Renderer(object):
 		print "Rendering class " + className
 		dirs = className.split('.')
 		page = os.path.join(self.path, *dirs)+'.html'
+		path = os.path.dirname(os.path.join(*dirs))
 		print "Writing " + page
 		ensureDir(page)
 		rootDir = "../" * (len(dirs)-1)
@@ -122,7 +123,7 @@ class Renderer(object):
 			f.write(classHeader % (className, rootDir, className))
 			for line in classData['lines']:
 				f.write('<li>' +
-						''.join([tokenToHTML(token, page) for token in line]) +
+						''.join([tokenToHTML(token, path) for token in line]) +
 						'</li>\n')
 			f.write(classFooter)
 
