@@ -44,7 +44,6 @@ def readInstructions(lines):
 		#matching an instruction
 		m_inst = re.match(r"^\s*([0-9]*): (.*)\s*(#[0-9]*)?\s*(\/\/\s*(.*);)?$",line) 
 		if m_inst:
-			print('match instruction')
 			instructions[m_inst.group(1)] = [m_inst.group(2),m_inst.group(3),m_inst.group(4)]
 		#when we've hit the line number table, stop
 		elif re.match("^\s*LineNumberTable:\s*$",line):
