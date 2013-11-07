@@ -29,7 +29,7 @@ def javap(file):
 
 def readConstantPool(lines):
 	constants = [] # indexed from 1 in javap
-	for line in lines:
+	for line in lines:#                   g1         g2       g3 
 		m = re.match(r"\s*#[0-9]* = ([^\s]*)\s*(.*?)(?:\s*\/\/\s*(.*))?$", line)
 		if m:
 			(name, val, comment) = (m.group(1), m.group(2), m.group(3))
@@ -42,7 +42,7 @@ def readInstructions(lines):
 	instructions = collections.defaultdict(list)
 	for line in lines:
 		#matching an instruction
-		m_inst = re.match(r"^\s*([0-9]*): (.*)\s*(#[0-9]*)?\s*(\/\/\s*(.*);)?$",line) 
+		m_inst = re.match(r"^\s*([0-9]*): ([^\s]*)\s*(#[0-9]*)?(?:\s*\/\/\s*(.*))?$",line) 
 		if m_inst:
 			instructions[m_inst.group(1)] = [m_inst.group(2),m_inst.group(3),m_inst.group(4)]
 		#when we've hit the line number table, stop
@@ -175,8 +175,9 @@ if __name__ == '__main__':
 	parser = Parser('java')
 	info = parser.parse()
 	first = next(info)
-	print('constants')
-	print_array_lines(first['constants'])
+	print('instructions')
+	#print_array_lines(first['constants'])
+	print_dic(first['instructions'])
 	'''	
 	for i in info:
 		print('##############')
