@@ -28,7 +28,7 @@ def javap(file):
 	return iter(proc.stdout.readline, '')
 
 def readConstantPool(lines):
-	constants = [None] # indexed from 1 in javap
+	constants = [] # indexed from 1 in javap
 	for line in lines:
 		m = re.match(r"\s*#[0-9]* = ([^\s]*)\s*(.*?)(?:\s*\/\/\s*(.*))?$", line)
 		if m:
@@ -44,7 +44,6 @@ def readInstructions(lines):
 		#matching an instruction
 		m_inst = re.match(r"^\s*([0-9]*): (.*)\s*(#[0-9]*)?\s*(\/\/\s*(.*);)?$",line) 
 		if m_inst:
-			print('match instruction')
 			instructions[m_inst.group(1)] = [m_inst.group(2),m_inst.group(3),m_inst.group(4)]
 		#when we've hit the line number table, stop
 		elif re.match("^\s*LineNumberTable:\s*$",line):
@@ -52,7 +51,7 @@ def readInstructions(lines):
 
 
 def readLineTable(lines,instructions,constants):
-	lineNum= collections.defaultdict(list)
+	line_table = collections.defaultdict(list)
 	prev= [None]
 	for line in lines:
 		#loop through and build the line number table	
@@ -73,9 +72,9 @@ def readLineTable(lines,instructions,constants):
 							if constants[constant][0] == 'Class':
 								inst_constants.append(constants[constant][1])
 								
-					lineNum[m.group(1)] = inst_constants	
+					line_table[m.group(1)] = inst_constants	
 			prev = (m.group(1),m.group(2))
-	return lineNum
+	return line_table
 			
 
 
@@ -115,15 +114,18 @@ class Parser(object):
 					#get constant pool
 					if line == "Constant pool:\n":
 						sourceData['constants'] = readConstantPool(javapFile)
+
 					#get the instruction list for a given method
 					mID_re =  "(("+"|".join(methodIDs)+") )*"
 					type_re = "(("+"|".join(types)    +") )?"
 					if re.match("^\s*"+mID_re+type_re+".*\((.*)\);$",line):
 						sourceData['instructions'] = readInstructions(javapFile)
+
 					#get the line table (should happen right after instructions)
 					if re.match("^\s*LineNumberTable:\s*$",line):
 						sourceData['line_table'] = readLineTable(javapFile,sourceData['instructions'],sourceData['constants'])
 
+			'''
 			#get the info for each line in the source files
 			line_tokens = []
 			for toks in scan(open(javaFile)):
@@ -135,7 +137,9 @@ class Parser(object):
 					line.append(tok)
 				line_tokens.append(line)
 			sourceData['lines'] = line_tokens
+			'''
 			yield sourceData
+
 
 def add_comments(line_tokens):
 	for line in line_tokens:
@@ -161,8 +165,6 @@ def add_comments(line_tokens):
 				line[i+1:] = []
 				break
 
-	return line_tokens
-
 def print_array_lines(lis):
 	for l in lis: print(l)
 def print_dic(dic):
@@ -173,7 +175,8 @@ if __name__ == '__main__':
 	parser = Parser('java')
 	info = parser.parse()
 	first = next(info)
-	print_dic(first['line_table'])
+	print('constants')
+	print_array_lines(first['constants'])
 	'''	
 	for i in info:
 		print('##############')
