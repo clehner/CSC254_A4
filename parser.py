@@ -40,14 +40,18 @@ def readConstantPool(lines):
 
 def readInstructions(lines):
 	instructions = collections.defaultdict(list)
+	lines.next()
+	lines.next()
+	lines.next()
 	for line in lines:
 		#matching an instruction
 		m_inst = re.match(r"^\s*([0-9]*): ([^\s]*)\s*(#[0-9]*)?(?:\s*\/\/\s*(.*))?$",line) 
 		if m_inst:
-			instructions[m_inst.group(1)] = [m_inst.group(2),m_inst.group(3),m_inst.group(4)]
+			instructions[int(m_inst.group(1))] = [m_inst.group(2),m_inst.group(3),m_inst.group(4)]
 		#when we've hit the line number table, stop
-		elif re.match("^\s*LineNumberTable:\s*$",line):
-			return instructions
+		else:
+			break
+	return instructions
 
 
 def readLineTable(lines,instructions,constants):
@@ -56,25 +60,25 @@ def readLineTable(lines,instructions,constants):
 	prev= [None]
 	for line in lines:
 		#loop through and build the line number table	
-		m = re.match(r"\sline ([0-9]*) :([0-9]*)",line)
+		m = re.match(r"\s*line ([0-9]*): ([0-9]*)",line)
 		if m:
-			last_instruction = m.group(2)
+			#print('groups- ',m.group(1),m.group(2))
+			last_instruction = int(m.group(2))
 			if not prev == [None]:	
-				first_instruction = prev[1]
+				first_instruction = int(prev[1])
+				print('instruction range',first_instruction," : ",last_instruction)
 				#go through instructions, get constants
 				for i in range(first_instruction,last_instruction-1):
 					inst_constants = []
 					#check if instruction is presetn
 					if i in instructions:
-						#check if that instruction is in constant table
-						constant = instructions[3]
-						if instructions[3] != None:
-							#check if that constant is a method/class
-							if constants[constant][0] == 'Class':
-								inst_constants.append(constants[constant][1])
-								
-					line_table[m.group(1)] = inst_constants	
+						line_table[m.group(1)].append(instructions[i])
 			prev = (m.group(1),m.group(2))
+		else:
+			line_table[prev[2]].append(['return'])
+			break
+	print('printing line table')
+	print_dic(line_table)
 	return line_table
 			
 
@@ -122,9 +126,12 @@ class Parser(object):
 					if re.match("^\s*"+mID_re+type_re+".*\((.*)\);$",line):
 						sourceData['instructions'] = readInstructions(javapFile)
 
+						sourceData['line_table'] = readLineTable(javapFile,sourceData['instructions'],sourceData['constants'])
+					'''
 					#get the line table (should happen right after instructions)
 					if re.match("^\s*LineNumberTable:\s*$",line):
 						sourceData['line_table'] = readLineTable(javapFile,sourceData['instructions'],sourceData['constants'])
+					'''
 			#I commented these to test the other stuff, feel free to uncomment
 			'''
 			#get the info for each line in the source files
