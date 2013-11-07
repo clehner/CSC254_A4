@@ -7,7 +7,7 @@ keywords = ['abstact','assert','boolean','break','byte','case','catch','const','
 
 scanner = re.Scanner([
 	(r'".*?(?:\\\\)*"', lambda s, tok: Token(tok, Token.PLAIN)),
-	(r'/[/*].+', lambda s, tok: Token(tok, Token.COMMENT)),
+	(r'/[/*].*', lambda s, tok: Token(tok, Token.COMMENT)),
 	(r'\s+', lambda s, tok: Token(tok, Token.PLAIN)),
 	('(?:' + '|'.join(keywords) + ')(?=[^a-zA-Z0-9_])', lambda s, tok: Token(tok, Token.KEYWORD)),
 	(r'[a-zA-Z0-9_]+(?=\()', lambda s, tok: Token(tok, Token.METHOD_INVOCATION)),

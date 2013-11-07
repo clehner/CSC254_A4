@@ -55,8 +55,8 @@ def readLineTable(lines,instructions,constants):
 	prev= [None]
 	for line in lines:
 		#loop through and build the line number table	
-		me = re.match(r"\sline ([0-9]*) :([0-9]*)",line)
-		if l_num_re:
+		m = re.match(r"\sline ([0-9]*) :([0-9]*)",line)
+		if m:
 			last_instruction = m.group(2)
 			if not prev == [None]:	
 				first_instruction = prev[1]
