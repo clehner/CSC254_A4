@@ -73,11 +73,13 @@ def readInstructions(lines):
 
 def readLineTable(lines,instructions,line_table):
 	prev = [0, 0]
+	first_line_read = -1
 	for line in lines:
 		#loop through and build the line number table	
 		m = re.match(r"\s*line ([0-9]*): ([0-9]*)",line)
 		if m:
 			curr = (line_num, i_num) = (int(m.group(1)), int(m.group(2)))
+			if first_line_read < 0: first_line_read = line_num
 			last_instruction = i_num
 			if not prev == [None]:	
 				first_instruction = prev[1]
@@ -91,7 +93,7 @@ def readLineTable(lines,instructions,line_table):
 		else:
 			line_table[prev[0]].append(['return'])
 			break
-	return line_table
+	return (line_table,first_line_read)
 
 def parse_constant(constants, num):
 	num = int(num[1:])
@@ -116,6 +118,12 @@ def find_method_invocation(line_num, method_name, source_data):
 				return (class_name,parse_method_type( method_type))
 	return None
 
+def find_method_declaration(line_num, method_name, source_data):
+	for (class_name, method_type, start_line, end_line) in\
+		source_data['method_refs'][method_name]:
+			if line_num >= start_line and line_num <= end_line:
+				return (class_name, method_type)
+
 def parse_method_type(method_type):
 	types = method_scanner.scan(method_type)[0]
 	return '(' + ', '.join(types) + ')'
@@ -128,10 +136,10 @@ def annotate_token(tok, line_num, source_data):
 			(tok.class_name, tok.method_type) = m
 		else:
 			#it's a declaration, not invocation
-			tok.tok_type = Token.METHOD_DECLARATION
-			tok.class_name = 'Declaration'
-			tok.method_type = 'todo'
-
+			m = find_method_declaration(line_num, tok.text, source_data)
+			if m:
+				(tok.class_name, tok.method_type) = m
+				tok.tok_type = Token.METHOD_DECLARATION
 
 """
 Parser
@@ -161,7 +169,8 @@ class Parser(object):
 				for line in javapFile:
 					m = re.match(r"^.*class (.+)$", line)
 					if m:
-						sourceData['class_name'] = m.group(1)
+						class_name = m.group(1)
+						sourceData['class_names'].append(class_name)
 						break
 
 				for line in javapFile:
@@ -172,11 +181,15 @@ class Parser(object):
 
 				for line in javapFile:
 					#get the instruction list for a given method
-					mID_re =  "(("+"|".join(methodIDs)+") )*"
-					type_re = "(("+"|".join(types)    +") )?"
-					if re.match("^\s*"+mID_re+type_re+".*\((.*)\);$",line):
+					mID_re =  "(?:(?:"+"|".join(methodIDs)+") )*"
+					type_re = "(?:(?:"+"|".join(types)    +") )?"
+					m = re.match("^\s*"+mID_re+type_re+"([^ ]*)(\(.*\));$",line)
+					if m:
+						(method_name, m_types) = (m.group(1), m.group(2))
+						prev_line_num = len(sourceData['line_table'])
 						instructions = readInstructions(javapFile)
-						sourceData['line_table'] = readLineTable(javapFile, instructions, sourceData['line_table'])
+						(sourceData['line_table'], first_line_read) = readLineTable(javapFile, instructions, sourceData['line_table'])
+						sourceData['method_refs'][method_name].append((class_name, m_types, prev_line_num, first_line_read))
 					'''
 					#get the line table (should happen right after instructions)
 					if re.match("^\s*LineNumberTable:\s*$",line):

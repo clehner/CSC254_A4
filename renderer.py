@@ -58,10 +58,10 @@ Get a URL to a class page, relative to another page
 """
 def getClassURL(className, page):
 	classPage = className.replace('.', os.path.sep) + '.html'
-	print('classPage ',classPage)
 	if 'java' in className:
 		return 'http://docs.oracle.com/javase/7/docs/api/' + classPage
-	return os.path.relpath(classPage, page)
+	else:
+		return os.path.relpath(classPage, page)
 
 """
 Render a token on a page as text/html
@@ -81,7 +81,7 @@ def tokenToHTML(tok, page):
 		return '<a href="' + link + '" class="' + tokType + '">' + text + '</a>'
 	elif tok.tok_type == Token.METHOD_DECLARATION:
 		# make an anchor for the declaration, that can be linked to
-		name = tok.method_type
+		name = tok.text + tok.method_type
 		return '<a id="' + name + '" class="' + tokType + '">' + text + '</a>'
 	elif tokType:
 		# render a token of a given type
@@ -118,7 +118,7 @@ class Renderer(object):
 	Create and write an HTML page for a Java class
 	"""
 	def renderClass(self, classData):
-		className = classData['class_name']
+		className = classData['class_names'][0]
 		print "Rendering " + className
 		dirs = className.split('.')
 		page = os.path.join(self.path, *dirs)+'.html'
