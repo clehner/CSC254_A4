@@ -18,17 +18,14 @@ method_scanner = re.Scanner([
 ])
 
 """
-Find java files and their associated class files in a directory.
-Returns an iterator of tuple of java filename and class filenames.
+Find java files and class files in each directory.
+Returns an iterator of tuple of java filenames and class filenames.
 """
-def findJavaFiles(path):
+def findClassFiles(path):
 	for root, dirs, files in os.walk(path):
-		for file in fnmatch.filter(files, '*.java'):
-			javaFile = os.path.join(root, file)
-			classesFn = file.replace('.java', '*.class')
-			classFiles = fnmatch.filter(files, classesFn)
-			classFiles = [os.path.join(root, file) for file in classFiles]
-			yield (javaFile, classFiles)
+		classFiles = fnmatch.filter(files,'*.class')
+		classFiles = [os.path.join(root, file) for file in classFiles]
+		yield (classFiles, root)
 
 """
 Run javap to disassemble a classfile.
@@ -117,11 +114,11 @@ def find_method_invocation(line_num, method_name, source_data):
 			const = parse_constant(constants, inst[1])
 			(class_name, (name, method_type)) = const
 			if method_name == name:
-				print('matched name', method_name)
+				#print('matched name', method_name)
 				return (class_name,parse_method_type( method_type))
-			else:
-				print('incorrect name', method_name, name)
-	print('instructions', instructions)
+			#else:
+				#print('incorrect name', method_name, name)
+	#print('instructions', instructions)
 	return None
 
 def find_method_declaration(line_num, method_name, source_data):
@@ -152,6 +149,21 @@ def annotate_token(tok, line_num, source_data):
 						"\" on line "+str(line_num))
 
 """
+maps java source files to the classes they house
+"""
+def match_src_class(classFiles, rootDir):
+	src_class = collections.defaultdict(list)
+	for classFile in classFiles:		
+		javapFile = javap(classFile)
+		for line in javapFile:
+			m = re.match('^\s*Compiled from "(.*)"\s*$', line)
+			if m:
+				javaFile = os.path.join(rootDir, m.group(1))
+				src_class[javaFile].append(javapFile)
+				break
+	return src_class
+
+"""
 Parser
 """
 class Parser(object):
@@ -164,55 +176,63 @@ class Parser(object):
 	Return an iterator of class data objects
 	"""
 	def parse(self):
-		for (javaFile, classFiles) in findJavaFiles(self.path):
-			#initialization junk
-			sourceData = {}
-			sourceData['class_names'] = []
-			sourceData['constants'] = []
-			sourceData['method_refs'] = collections.defaultdict(list)
-			sourceData['lines'] = []
-			sourceData['line_table'] = collections.defaultdict(list)
+		for (classFiles, rootDir) in findClassFiles(self.path):
+			src_class = match_src_class(classFiles, rootDir)
+			for javaFile, javapFiles in src_class.iteritems():
+				yield self.parseJava(javaFile, javapFiles)
 
-			for classFile in classFiles:
-				javapFile = javap(classFile)
-				#get the main class name
-				for line in javapFile:
-					m = re.match(r"^.*class (.+)$", line)
-					if m:
-						class_name = m.group(1)
-						sourceData['class_names'].append(class_name)
-						break
+	def parseJava(self, javaFile, javapFiles):
+		#initialization junk
+		sourceData = {}
+		sourceData['class_names'] = []
+		sourceData['constants'] = []
+		sourceData['method_refs'] = collections.defaultdict(list)
+		sourceData['lines'] = []
+		sourceData['line_table'] = collections.defaultdict(list)
 
-				for line in javapFile:
-					#get constant pool
-					if line == "Constant pool:\n":
-						sourceData['constants'] = readConstantPool(javapFile)
-						break
+		for javapFile in javapFiles:
+			#get the main class name
+			for line in javapFile:
+				m = re.match(r"^.*(?:class|interface) ([a-zA-Z0-9_.]+).*?$", line)
+				if m:
+					class_name = m.group(1)
+					sourceData['class_names'].append(class_name)
+					break
 
-				for line in javapFile:
-					#get the instruction list for a given method
-					m = re.match(class_declaration_re,line)
-					if m:
-						(method_name, m_types) = (m.group(1), m.group(2))
-						prev_line_num = len(sourceData['line_table'])
-						instructions = readInstructions(javapFile)
-						(sourceData['line_table'], first_line_read) = readLineTable(javapFile, instructions, sourceData['line_table'])
-						sourceData['method_refs'][method_name].append((class_name, m_types, prev_line_num, first_line_read))
-					'''
-					#get the line table (should happen right after instructions)
-					if re.match("^\s*LineNumberTable:\s*$",line):
-						sourceData['line_table'] = readLineTable(javapFile,sourceData['instructions'],sourceData['constants'])
-					'''
-			#get the info for each line in the source files
-			line_tokens = []
-			for line_num, toks in enumerate(scan(open(javaFile))):
-				line = []
-				for tok in toks:
-					annotate_token(tok, line_num+1, sourceData)
-					line.append(tok)
-				line_tokens.append(line)
-			sourceData['lines'] = line_tokens
-			yield sourceData
+			for line in javapFile:
+				#get constant pool
+				if line == "Constant pool:\n":
+					sourceData['constants'] = readConstantPool(javapFile)
+					break
+
+			for line in javapFile:
+				#get the instruction list for a given method
+				m = re.match(class_declaration_re,line)
+				if m:
+					(method_name, m_types) = (m.group(1), m.group(2))
+					prev_line_num = len(sourceData['line_table'])
+					instructions = readInstructions(javapFile)
+					(sourceData['line_table'], first_line_read) = readLineTable(javapFile, instructions, sourceData['line_table'])
+					sourceData['method_refs'][method_name].append((class_name, m_types, prev_line_num, first_line_read))
+				'''
+				#get the line table (should happen right after instructions)
+				if re.match("^\s*LineNumberTable:\s*$",line):
+					sourceData['line_table'] = readLineTable(javapFile,sourceData['instructions'],sourceData['constants'])
+				'''
+		#get the info for each line in the source files
+		line_tokens = []
+		for line_num, toks in enumerate(scan(open(javaFile))):
+			line = []
+			for tok in toks:
+				annotate_token(tok, line_num+1, sourceData)
+				line.append(tok)
+			line_tokens.append(line)
+		sourceData['lines'] = line_tokens
+		if len(sourceData['class_names']) is 0:
+			sourceData['class_name'] = 'Unknown'
+		else:
+			sourceData['class_name'] = min(sourceData['class_names'], key=len)
+		return sourceData
 
 
 def print_array_lines(lis):

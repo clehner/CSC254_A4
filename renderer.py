@@ -121,7 +121,7 @@ class Renderer(object):
 	"""
 	def renderClass(self, classData):
 		# get the primary classname
-		className = min(classData['class_names'], key=len)
+		className = classData['class_name']
 		print "Rendering " + className
 		dirs = className.split('.')
 		page = os.path.join(self.path, *dirs)+'.html'
