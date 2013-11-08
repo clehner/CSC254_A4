@@ -54,7 +54,7 @@ def readConstantPool(lines):
 			break
 	return constants
 
-def readInstructions(lines):
+def readInstructions(lines, constants):
 	instructions = collections.defaultdict(list)
 	lines.next()
 	lines.next()
@@ -63,7 +63,14 @@ def readInstructions(lines):
 		#matching an instruction
 		m_inst = re.match(r"^\s*([0-9]*): ([^\s]*)\s*(.*?)(?:\s*\/\/\s*(.*))?$",line)
 		if m_inst:
-			instructions[int(m_inst.group(1))] = [m_inst.group(2),m_inst.group(3),m_inst.group(4)]
+			(idx, instType, params, comment) = (int(m_inst.group(1)),m_inst.group(2),m_inst.group(3),m_inst.group(4))
+
+			if instType[:6] == 'invoke':
+				resolved_params = parse_constant(constants, params)
+			else:
+				resolved_params = params
+
+			instructions[idx] = (instType, resolved_params, comment)
 		#when we've hit the line number table, stop
 		else:
 			break
@@ -108,10 +115,10 @@ def parse_constant(constants, num):
 
 def find_method_invocation(line_num, method_name, source_data):
 	instructions = source_data['line_table'][line_num]
-	constants = source_data['constants']
 	for inst in instructions:
 		if inst[0][:6] == 'invoke':
-			const = parse_constant(constants, inst[1])
+			const = inst[1]
+			print('invoke', const, inst)
 			(class_name, (name, method_type)) = const
 			if method_name == name:
 				#print('matched name', method_name)
@@ -145,8 +152,8 @@ def annotate_token(tok, line_num, source_data):
 				tok.tok_type = Token.METHOD_DECLARATION
 			else:
 				tok.tok_type = Token.PLAIN
-				print("unknown method thing \"" + tok.text +
-						"\" on line "+str(line_num))
+				#print("unknown method thing \"" + tok.text +
+						#"\" on line "+str(line_num))
 
 """
 maps java source files to the classes they house
@@ -202,7 +209,7 @@ class Parser(object):
 			for line in javapFile:
 				#get constant pool
 				if line == "Constant pool:\n":
-					sourceData['constants'] = readConstantPool(javapFile)
+					constants = readConstantPool(javapFile)
 					break
 
 			for line in javapFile:
@@ -211,7 +218,7 @@ class Parser(object):
 				if m:
 					(method_name, m_types) = (m.group(1), m.group(2))
 					prev_line_num = len(sourceData['line_table'])
-					instructions = readInstructions(javapFile)
+					instructions = readInstructions(javapFile, constants)
 					(sourceData['line_table'], first_line_read) = readLineTable(javapFile, instructions, sourceData['line_table'])
 					sourceData['method_refs'][method_name].append((class_name, m_types, prev_line_num, first_line_read))
 				'''
