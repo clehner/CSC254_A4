@@ -215,30 +215,6 @@ class Parser(object):
 			yield sourceData
 
 
-def add_comments(line_tokens):
-	for line in line_tokens:
-		start_comment = False
-		for i in range(len(line)):
-			j = line[i].text.find('//')
-			if j == 0:
-				start_comment = True
-				line[i].tok_type = Token.COMMENT
-			elif j > -1:
-				#split the token to take the '//' part off
-				split_token = line[i].text.split('//')
-				line[i:i+1] = [
-					Token(split_token[0], line[i].tok_type),
-					Token('//'+split_token[1], Token.COMMENT)]
-				start_comment = True
-				# skip the regular token
-				i += 1
-
-			#flatten the rest of the list if there's a comment
-			if(start_comment):
-				line[i].text = ''.join([tok.text for tok in line[i:]])
-				line[i+1:] = []
-				break
-
 def print_array_lines(lis):
 	for l in lis: print(l)
 def print_dic(dic):
