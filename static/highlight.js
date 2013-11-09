@@ -1,7 +1,17 @@
 window.onload = hash_change;
 window.onhashchange = hash_change;
 
+var current = '';
+
 function hash_change(){
-	if(location.hash.substr(1) && document.getElementById(location.hash.substr(1)))
-		document.getElementById(location.hash.substr(1)).parentNode.className = 'highlight';
+	hash = location.hash.substr(1);
+	section = document.getElementById(hash);
+	if(hash && section) {
+		section.parentNode.className = 'highlight';
+		
+		if(current)
+			current.className = "";
+		current = section.parentNode;
+	}
+
 }

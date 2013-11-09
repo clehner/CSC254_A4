@@ -15,3 +15,7 @@
 }
 
 .highlight{background-color: red;}
+
+.method-declaration {
+	border-bottom: 1px dashed blue;
+}
