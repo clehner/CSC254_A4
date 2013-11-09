@@ -2,7 +2,7 @@ import os, fnmatch, subprocess, itertools, re,collections
 from token import Token
 from scanner import scan
 
-class_declaration_re = "^  .*? ([^\s]*)(\(.*?\));$"
+method_declaration_re = "^  .*? ([^\s]*)(\(.*?\));$"
 
 method_scanner = re.Scanner([
 #todo: add more arg types to read with this regex
@@ -79,14 +79,17 @@ def readInstructions(lines, constants):
 def readLineTable(lines,instructions,line_table):
 	prev = [0, 0]
 	first_line_read = -1
+	last_line_read = -1
 	for line in lines:
 		#loop through and build the line number table	
 		m = re.match(r"\s*line ([0-9]*): ([0-9]*)",line)
 		if m:
 			curr = (line_num, i_num) = (int(m.group(1)), int(m.group(2)))
-			if first_line_read < 0: first_line_read = line_num
+			last_line_read = line_num
+			if first_line_read < 0:
+				first_line_read = line_num
 			last_instruction = i_num
-			if not prev == [None]:	
+			if not prev == [None]:
 				first_instruction = prev[1]
 				#go through instructions, get constants
 				for i in range(first_instruction,last_instruction-1):
@@ -98,7 +101,9 @@ def readLineTable(lines,instructions,line_table):
 		else:
 			line_table[prev[0]].append(['return'])
 			break
-	return (line_table,first_line_read)
+	#print (first_line_read,last_line_read)
+	#print('lines', line_table)
+	return (line_table,first_line_read,last_line_read)
 
 def parse_constant(constants, num):
 	num = int(num[1:])
@@ -114,6 +119,8 @@ def parse_constant(constants, num):
 
 def find_method_invocation(line_num, method_name, source_data):
 	instructions = source_data['line_table'][line_num]
+	#if method_name == 'invoke':
+		#print('instructions', source_data['line_table'], line_num, instructions)
 	for inst in instructions:
 		if inst[0][:6] == 'invoke':
 			const = inst[1]
@@ -123,14 +130,17 @@ def find_method_invocation(line_num, method_name, source_data):
 				return (class_name,parse_method_type( method_type))
 			#else:
 				#print('incorrect name', method_name, name)
-	#print('instructions', instructions)
 	return None
 
 def find_method_declaration(line_num, method_name, source_data):
+	if method_name == 'add':
+		print(line_num, source_data['method_refs'][method_name])
 	for (class_name, method_type, start_line, end_line) in\
 		source_data['method_refs'][method_name]:
 			if line_num >= start_line and line_num <= end_line:
 				return (class_name, method_type)
+			else:
+				print("bad match", line_num, start_line, end_line, method_name)
 
 def parse_method_type(method_type):
 	types = method_scanner.scan(method_type)[0]
@@ -152,7 +162,6 @@ def annotate_token(tok, line_num, source_data):
 				tok.tok_type = Token.PLAIN
 				#print("unknown method thing \"" + tok.text +
 						#"\" on line "+str(line_num))
-
 """
 maps java source files to the classes they house
 """
@@ -198,7 +207,7 @@ class Parser(object):
 		for javapFile in javapFiles:
 			#get the main class name
 			for line in javapFile:
-				m = re.match(r"^.*(?:class|interface) ([a-zA-Z0-9_.]+).*?$", line)
+				m = re.match(r"^.*(?:class|interface) ([^\s]+).*?$", line)
 				if m:
 					class_name = m.group(1)
 					sourceData['class_names'].append(class_name)
@@ -210,15 +219,19 @@ class Parser(object):
 					constants = readConstantPool(javapFile)
 					break
 
+			prev_line_num = 0
 			for line in javapFile:
 				#get the instruction list for a given method
-				m = re.match(class_declaration_re,line)
+				m = re.match(method_declaration_re,line)
 				if m:
 					(method_name, m_types) = (m.group(1), m.group(2))
-					prev_line_num = len(sourceData['line_table'])
+					#prev_line_num = len(sourceData['line_table'])
 					instructions = readInstructions(javapFile, constants)
-					(sourceData['line_table'], first_line_read) = readLineTable(javapFile, instructions, sourceData['line_table'])
+					(sourceData['line_table'], first_line_read,last_line_read) = readLineTable(javapFile, instructions, sourceData['line_table'])
+					if prev_line_num > first_line_read:
+						prev_line_num = 0
 					sourceData['method_refs'][method_name].append((class_name, m_types, prev_line_num, first_line_read))
+					prev_line_num = last_line_read
 				'''
 				#get the line table (should happen right after instructions)
 				if re.match("^\s*LineNumberTable:\s*$",line):

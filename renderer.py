@@ -77,12 +77,21 @@ def tokenToHTML(tok, page):
 	tokType = tok.get_type()
 	if tok.tok_type == Token.METHOD_INVOCATION:
 		# make a link to the declaration of the method
-		rel_file = getClassURL(tok.class_name, page)
-		link = rel_file + '#' + tok.text + tok.method_type
+		s = tok.class_name.split('$', 2)
+		if len(s) == 2:
+			(outerclass, innerclass) = s
+			rel_file = getClassURL(outerclass, page)
+			link = rel_file + '#' + innerclass + '$' + tok.text + tok.method_type
+		else:
+			rel_file = getClassURL(tok.class_name, page)
+			link = rel_file + '#' + tok.text + tok.method_type
 		return '<a href="' + link + '" class="' + tokType + '">' + text + '</a>'
 	elif tok.tok_type == Token.METHOD_DECLARATION:
 		# make an anchor for the declaration, that can be linked to
 		name = tok.text + tok.method_type
+		sp = tok.class_name.split('$',2)
+		if len(sp) > 1:
+			name = sp[1]+'$'+name
 		return '<a id="' + name + '" class="' + tokType + '">' + text + '</a>'
 	elif tokType:
 		# render a token of a given type
@@ -128,7 +137,7 @@ class Renderer(object):
 		ensureDir(page)
 		rootDir = "../" * (len(dirs)-1)
 		with open(page, 'w') as f:
-			f.write(classHeader % (className, rootDir, className))
+			f.write(classHeader % (className, rootDir, rootDir, className))
 			for line in classData['lines']:
 				f.write('<li>' +
 						''.join([tokenToHTML(token, path) for token in line]) +
