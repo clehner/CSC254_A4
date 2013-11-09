@@ -2,11 +2,7 @@ import os, fnmatch, subprocess, itertools, re,collections
 from token import Token
 from scanner import scan
 
-methodIDs = ['public','private','static','abstract','native','final','synchronized','volatile','strictfp']
-types = ['int','Integer','double','Double','float','Float','String','char','Character','void']
-mID_re =  "(?:(?:"+"|".join(methodIDs)+") )*"
-type_re = "(?:(?:"+"|".join(types)    +") )?"
-class_declaration_re = "^\s*"+mID_re+type_re+"([^ ]*)(\(.*\));$"
+class_declaration_re = "^  .*? ([^\s]*)(\(.*?\));$"
 
 method_scanner = re.Scanner([
 #todo: add more arg types to read with this regex
@@ -66,7 +62,10 @@ def readInstructions(lines, constants):
 			(idx, instType, params, comment) = (int(m_inst.group(1)),m_inst.group(2),m_inst.group(3),m_inst.group(4))
 
 			if instType[:6] == 'invoke':
-				resolved_params = parse_constant(constants, params)
+				if instType == 'invokeinterface':
+					resolved_params = parse_constant(constants, params.split(',')[0])
+				else:
+					resolved_params = parse_constant(constants, params)
 			else:
 				resolved_params = params
 
@@ -118,7 +117,6 @@ def find_method_invocation(line_num, method_name, source_data):
 	for inst in instructions:
 		if inst[0][:6] == 'invoke':
 			const = inst[1]
-			print('invoke', const, inst)
 			(class_name, (name, method_type)) = const
 			if method_name == name:
 				#print('matched name', method_name)
