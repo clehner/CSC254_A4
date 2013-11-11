@@ -92,14 +92,17 @@ def readLineTable(lines,instructions,line_table):
 			if not prev == [None]:
 				first_instruction = prev[1]
 				#go through instructions, get constants
-				for i in range(first_instruction,last_instruction-1):
+				for i in range(first_instruction,last_instruction):
 					inst_constants = []
-					#check if instruction is presetn
+					#check if instruction is present
 					if i in instructions:
 						line_table[prev[0]].append(instructions[i])
 			prev = curr
 		else:
-			line_table[prev[0]].append(['return'])
+			# add last instructions
+			for i in range(last_instruction,max(instructions)):
+				if i in instructions:
+					line_table[prev[0]].append(instructions[i])
 			break
 	return (line_table,first_line_read,last_line_read)
 
@@ -117,8 +120,6 @@ def parse_constant(constants, num):
 
 def find_method_invocation(line_num, method_name, source_data):
 	instructions = source_data['line_table'][line_num]
-	#if method_name == 'invoke':
-		#print('instructions', source_data['line_table'], line_num, instructions)
 	for inst in instructions:
 		if inst[0][:6] == 'invoke':
 			const = inst[1]
