@@ -8,7 +8,7 @@ function hash_change(){
 	section = document.getElementById(hash);
 	if(hash && section) {
 		section.parentNode.className = 'highlight';
-		
+
 		if(current)
 			current.className = "";
 		current = section.parentNode;

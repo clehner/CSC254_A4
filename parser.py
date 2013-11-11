@@ -81,7 +81,7 @@ def readLineTable(lines,instructions,line_table):
 	first_line_read = -1
 	last_line_read = -1
 	for line in lines:
-		#loop through and build the line number table	
+		#loop through and build the line number table
 		m = re.match(r"\s*line ([0-9]*): ([0-9]*)",line)
 		if m:
 			curr = (line_num, i_num) = (int(m.group(1)), int(m.group(2)))
@@ -101,8 +101,6 @@ def readLineTable(lines,instructions,line_table):
 		else:
 			line_table[prev[0]].append(['return'])
 			break
-	#print (first_line_read,last_line_read)
-	#print('lines', line_table)
 	return (line_table,first_line_read,last_line_read)
 
 def parse_constant(constants, num):
@@ -133,14 +131,12 @@ def find_method_invocation(line_num, method_name, source_data):
 	return None
 
 def find_method_declaration(line_num, method_name, source_data):
-	if method_name == 'add':
-		print(line_num, source_data['method_refs'][method_name])
 	for (class_name, method_type, start_line, end_line) in\
 		source_data['method_refs'][method_name]:
 			if line_num >= start_line and line_num <= end_line:
 				return (class_name, method_type)
-			else:
-				print("bad match", line_num, start_line, end_line, method_name)
+			#else:
+				#print("bad match", line_num, start_line, end_line, method_name)
 
 def parse_method_type(method_type):
 	types = method_scanner.scan(method_type)[0]
@@ -159,15 +155,14 @@ def annotate_token(tok, line_num, source_data):
 				(tok.class_name, tok.method_type) = m
 				tok.tok_type = Token.METHOD_DECLARATION
 			else:
+				# unable to identify
 				tok.tok_type = Token.PLAIN
-				#print("unknown method thing \"" + tok.text +
-						#"\" on line "+str(line_num))
 """
 maps java source files to the classes they house
 """
 def match_src_class(classFiles, rootDir):
 	src_class = collections.defaultdict(list)
-	for classFile in classFiles:		
+	for classFile in classFiles:
 		javapFile = javap(classFile)
 		for line in javapFile:
 			m = re.match('^\s*Compiled from "(.*)"\s*$', line)
@@ -232,11 +227,6 @@ class Parser(object):
 						prev_line_num = 0
 					sourceData['method_refs'][method_name].append((class_name, m_types, prev_line_num, first_line_read))
 					prev_line_num = last_line_read
-				'''
-				#get the line table (should happen right after instructions)
-				if re.match("^\s*LineNumberTable:\s*$",line):
-					sourceData['line_table'] = readLineTable(javapFile,sourceData['instructions'],sourceData['constants'])
-				'''
 		#get the info for each line in the source files
 		line_tokens = []
 		for line_num, toks in enumerate(scan(open(javaFile))):
