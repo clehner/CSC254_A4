@@ -26,7 +26,7 @@ inputDir = sys.argv[1]
 outputDir = "XREF"
 
 parser = Parser(inputDir)
-renderer = Renderer(outputDir)
+renderer = Renderer(outputDir, inputDir)
 for classData in parser.parse():
 	renderer.renderClass(classData)
 renderer.renderIndex();

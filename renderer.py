@@ -1,4 +1,5 @@
 import sys, os, fnmatch, shutil
+from datetime import datetime
 from token import Token
 
 """
@@ -14,6 +15,10 @@ indexHeader = """<!doctype html>
 </head>
 <body>
 	<h1>Java Cross-Indexer</h1>
+		<dt>Last run</dt>
+		<dd><time>%s</time></dd>
+		<dt>in directory</dt>
+		<dd><kbd>%s</kbd></dd>
 	<ul>
 """
 
@@ -105,8 +110,9 @@ Renderer
 Converts data about Java classes into HTML pages
 """
 class Renderer(object):
-	def __init__(self, outputDir):
+	def __init__(self, outputDir, inputDir):
 		self.path = outputDir
+		self.inputPath = os.path.abspath(inputDir)
 		scriptDir = os.path.dirname(sys.argv[0])
 		self.staticSource = os.path.join(scriptDir, 'static')
 		self.staticDest = os.path.join(self.path, 'static')
@@ -152,7 +158,8 @@ class Renderer(object):
 		page = os.path.join(self.path, 'index.html')
 		ensureDir(page)
 		with open(page, 'w') as f:
-			f.write(indexHeader)
+			timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+			f.write(indexHeader % (timestamp, self.inputPath))
 			# Add a link for every page in the directory
 			for root, dirs, files in os.walk(self.path):
 				for file in fnmatch.filter(files, '*.html'):
