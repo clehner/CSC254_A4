@@ -104,6 +104,9 @@ def readLineTable(lines,instructions,line_table):
 				if i in instructions:
 					line_table[prev[0]].append(instructions[i])
 			break
+	if first_line_read < 0:
+		first_line_read = float("infinity")
+		# todo: may need to distinguish between multiple interface methods
 	return (line_table,first_line_read,last_line_read)
 
 def parse_constant(constants, num):
