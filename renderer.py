@@ -117,7 +117,6 @@ class Renderer(object):
 		scriptDir = os.path.dirname(sys.argv[0])
 		self.staticSource = os.path.join(scriptDir, 'static')
 		self.staticDest = os.path.join(self.path, 'static')
-		self.classesRendered = []
 
 	"""
 	Copy static files into XREF directory
@@ -145,7 +144,7 @@ class Renderer(object):
 		page = os.path.join(self.path, *dirs)+'.html'
 		ensureDir(page)
 		rootDir = "../" * (len(dirs)-1)
-		self.classesRendered.append((page1, className, classData['has_main']))
+		self.renderIndexLine(page1, className, classData['has_main'])
 		with open(page, 'w') as f:
 			f.write(classHeader % (className, rootDir, rootDir, className))
 			for line in classData['lines']:
@@ -155,19 +154,30 @@ class Renderer(object):
 			f.write(classFooter)
 
 	"""
-	Build and write an index page, with table of contents for classes.
+	Start writing an index page, with table of contents for classes.
 	"""
-	def renderIndex(self):
+	def renderIndexHeader(self):
 		print "Rendering index"
 		page = os.path.join(self.path, 'index.html')
 		ensureDir(page)
-		with open(page, 'w') as f:
-			timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-			f.write(indexHeader % (timestamp, self.inputPath))
-			for (fileName, className, hasMain) in self.classesRendered:
-					if hasMain:
-						f.write(indexLinkLineMain %
-								(fileName, className, fileName))
-					else:
-						f.write(indexLinkLine % (fileName, className))
-			f.write(indexFooter)
+		self.index = open(page, 'w')
+		timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+		self.index.write(indexHeader % (timestamp, self.inputPath))
+
+	"""
+	Write a line of table of contents for one class
+	"""
+	def renderIndexLine(self, fileName, className, hasMain):
+		if hasMain:
+			line = indexLinkLineMain % (fileName, className, fileName)
+		else:
+			line = indexLinkLine % (fileName, className)
+		self.index.write(line)
+		self.index.flush()
+
+	"""
+	Finish up writing the index page
+	"""
+	def renderIndexFooter(self):
+		self.index.write(indexFooter)
+		self.index.close()

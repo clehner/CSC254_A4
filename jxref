@@ -27,7 +27,8 @@ outputDir = "XREF"
 
 parser = Parser(inputDir)
 renderer = Renderer(outputDir, inputDir)
+renderer.renderIndexHeader();
 for classData in parser.parse():
 	renderer.renderClass(classData)
-renderer.renderIndex();
+renderer.renderIndexFooter();
 renderer.copyStatics();
