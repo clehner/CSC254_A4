@@ -28,6 +28,7 @@ indexFooter = """	</ul>
 """
 
 indexLinkLine = '\t\t<li><a href="%s">%s</a></li>\n'
+indexLinkLineMain = '\t\t<li><a href="%s">%s</a> <a href="%s#main(java.lang.String[])">main</a></li>\n'
 
 """
 Template for class page
@@ -116,6 +117,7 @@ class Renderer(object):
 		scriptDir = os.path.dirname(sys.argv[0])
 		self.staticSource = os.path.join(scriptDir, 'static')
 		self.staticDest = os.path.join(self.path, 'static')
+		self.classesRendered = []
 
 	"""
 	Copy static files into XREF directory
@@ -138,10 +140,12 @@ class Renderer(object):
 		className = classData['class_name']
 		print "Rendering " + className
 		dirs = className.split('.')
-		page = os.path.join(self.path, *dirs)+'.html'
 		path = os.path.dirname(os.path.join(*dirs))
+		page1 = os.path.join(*dirs)+'.html'
+		page = os.path.join(self.path, *dirs)+'.html'
 		ensureDir(page)
 		rootDir = "../" * (len(dirs)-1)
+		self.classesRendered.append((page1, className, classData['has_main']))
 		with open(page, 'w') as f:
 			f.write(classHeader % (className, rootDir, rootDir, className))
 			for line in classData['lines']:
@@ -160,14 +164,10 @@ class Renderer(object):
 		with open(page, 'w') as f:
 			timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 			f.write(indexHeader % (timestamp, self.inputPath))
-			# Add a link for every page in the directory
-			for root, dirs, files in os.walk(self.path):
-				for file in fnmatch.filter(files, '*.html'):
-					if file == 'index.html':
-						continue
-					relDir = os.path.relpath(root, self.path)
-					relFile = os.path.join(relDir, file).replace('./', '')
-					className = relFile.replace(os.path.sep,
-							'.').replace('.html', '')
-					f.write(indexLinkLine % (relFile, className))
+			for (fileName, className, hasMain) in self.classesRendered:
+					if hasMain:
+						f.write(indexLinkLineMain %
+								(fileName, className, fileName))
+					else:
+						f.write(indexLinkLine % (fileName, className))
 			f.write(indexFooter)

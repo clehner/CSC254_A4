@@ -198,11 +198,12 @@ class Parser(object):
 		sourceData['method_refs'] = collections.defaultdict(list)
 		sourceData['lines'] = []
 		sourceData['line_table'] = collections.defaultdict(list)
+		sourceData['has_main'] = False
 
 		for javapFile in javapFiles:
 			#get the main class name
 			for line in javapFile:
-				m = re.match(r"^.*(?:class|interface) ([^\s]+).*?$", line)
+				m = re.match(r"^.*(?:class|interface) ([^\s<>]+).*?$", line)
 				if m:
 					class_name = m.group(1)
 					sourceData['class_names'].append(class_name)
@@ -227,6 +228,8 @@ class Parser(object):
 						prev_line_num = 0
 					sourceData['method_refs'][method_name].append((class_name, m_types, prev_line_num, first_line_read))
 					prev_line_num = last_line_read
+		if 'main' in sourceData['method_refs']:
+			sourceData['has_main'] = True
 		#get the info for each line in the source files
 		line_tokens = []
 		for line_num, toks in enumerate(scan(open(javaFile))):
